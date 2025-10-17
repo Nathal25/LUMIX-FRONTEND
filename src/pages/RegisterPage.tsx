@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./RegisterPage.css";
+import "../styles/RegisterPage.scss";
 
 export const RegisterPage: React.FC = () => {
   const [name, setName] = useState("");

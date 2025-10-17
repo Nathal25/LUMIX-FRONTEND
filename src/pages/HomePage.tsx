@@ -1,5 +1,4 @@
-import React from "react";
-import "./HomePage.css";
+import "../styles/HomePage.scss";
 
 export function HomePage() {
   return (
