@@ -128,19 +128,34 @@ class AuthService {
 
   async forgotPassword(email: string): Promise<{ message: string }> {
     try {
-        const response = await apiClient.post<{ message: string }>(
+      const response = await apiClient.post<{ message: string }>(
         '/api/v1/users/forgot-password',
         { email }
-        );
-        return response;
+      );
+      return response;
     } catch (error) {
-        const apiError = error as ApiError;
-        throw new Error(apiError.message || 'Error al solicitar recuperación de contraseña');
+      const apiError = error as ApiError;
+      throw new Error(apiError.message || 'Error al solicitar recuperación de contraseña');
     }
-  } 
+  }
 
-
-
+  async resetPassword(
+    token: string,
+    email: string,
+    password: string,
+    confirmPassword: string
+  ): Promise<{ message: string }> {
+    try {
+      const response = await apiClient.post<{ message: string }>(
+        '/api/v1/users/reset-password',
+        { token, email, password, confirmPassword }
+      );
+      return response;
+    } catch (error) {
+      const apiError = error as ApiError;
+      throw new Error(apiError.message || 'Error al restablecer la contraseña');
+    }
+  }
 }
 
 

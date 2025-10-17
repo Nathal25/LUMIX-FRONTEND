@@ -22,7 +22,7 @@ return (
 	<Route path="/login" element={<LoginPage />} />
 	<Route path="/register" element={<RegisterPage />} />
 	<Route path="/reset-password" element={<ResetPasswordPage />} />
-	<Route path="/reset-password/new" element={<NewPasswordPage />} />
+	<Route path="/recover-password" element={<NewPasswordPage />} />
 	<Route path="/profile" element={<ProfilePage />} />
 	<Route path="/delete-account" element={<DeleteAccountPage />} />
 	<Route path="/dashboard" element={<Dashboard />} />
