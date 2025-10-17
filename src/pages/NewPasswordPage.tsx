@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router'; // asegúrate de importar useLocation
+import authService from '../services/authService';
 import '../styles/NewPasswordPage.scss';
 
 export const NewPasswordPage: React.FC = () => {
@@ -8,6 +9,13 @@ export const NewPasswordPage: React.FC = () => {
   const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState(false);
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // 👇 Aquí leemos los parámetros token y email
+  const { search } = useLocation();
+  const query = new URLSearchParams(search);
+  const token = query.get('token');
+  const email = query.get('email');
 
   const validate = () => {
     const errs: string[] = [];
@@ -17,15 +25,29 @@ export const NewPasswordPage: React.FC = () => {
     return errs;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
     setErrors(errs);
-    if (errs.length === 0) {
-      // aquí iría la llamada al backend para actualizar la contraseña
+    if (errs.length > 0) return;
+
+    setLoading(true);
+    try {
+      const response = await authService.resetPassword(
+        token!,
+        email!,
+        password,
+        confirm
+      );
+      console.log('Contraseña cambiada:', response.message);
       setSuccess(true);
       setPassword('');
       setConfirm('');
+    } catch (error: any) {
+      setErrors([error.message || 'Error al actualizar la contraseña']);
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,7 +108,9 @@ export const NewPasswordPage: React.FC = () => {
               </label>
             </div>
 
-            <button type="submit" className="newpass-btn">Guardar contraseña</button>
+            <button type="submit" className="newpass-btn" disabled={loading}>
+              {loading ? 'Actualizando...' : 'Guardar contraseña'}
+            </button>
           </form>
         )}
       </div>
