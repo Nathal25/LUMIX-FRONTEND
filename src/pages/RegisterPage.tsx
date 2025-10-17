@@ -23,7 +23,7 @@ export const RegisterPage: React.FC = () => {
       if (!re.test(email)) errs.push("El formato del correo no es válido.");
     }
 
-    if (!age.toString().trim()) errs.push("La edad es requerida.");
+    if (!age.trim()) errs.push("La edad es requerida.");
     else {
       const n = Number(age);
       if (Number.isNaN(n) || !Number.isFinite(n))
