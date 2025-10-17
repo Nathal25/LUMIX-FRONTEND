@@ -10,6 +10,7 @@ import { NewPasswordPage } from './pages/NewPasswordPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { DeleteAccountPage } from './pages/DeleteAccountPage';
 import { Dashboard } from './pages/Dashboard';
+import { Footer } from './components/Footer';
 
 const App: React.FC = () => {
 return (
@@ -28,6 +29,7 @@ return (
 	<Route path="/dashboard" element={<Dashboard />} />
 </Routes>
 </main>
+<Footer />
 </BrowserRouter>
 );
 };

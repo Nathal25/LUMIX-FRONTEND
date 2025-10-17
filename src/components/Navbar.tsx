@@ -65,6 +65,30 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
     };
   }, [isAuthProp]);
 
+  // nuevo: escuchar notificaciones globales de cambio de auth
+  useEffect(() => {
+    const refreshAuthState = () => {
+      const token = getCookie('authToken') ?? getCookie('token') ?? localStorage.getItem('authToken');
+      if (token) {
+        // opcional: verificar con backend si quieres mayor seguridad
+        setIsAuthenticated(true);
+      } else {
+        // intenta validar con backend (cookie HttpOnly)
+        authService
+          .checkAuth()
+          .then((user) => setIsAuthenticated(Boolean(user)))
+          .catch(() => setIsAuthenticated(false));
+      }
+    };
+
+    window.addEventListener('authChanged', refreshAuthState);
+    window.addEventListener('storage', refreshAuthState); // cambios desde otras pestañas
+    return () => {
+      window.removeEventListener('authChanged', refreshAuthState);
+      window.removeEventListener('storage', refreshAuthState);
+    };
+  }, []);
+
   const toggle = () => setOpen((v) => !v);
   const close = () => setOpen(false);
 
@@ -84,6 +108,9 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
 
     // fallback localStorage
     localStorage.removeItem('authToken');
+
+    // notificar al resto de la app que se cerró sesión
+    window.dispatchEvent(new Event('authChanged'));
 
     setIsAuthenticated(false);
     if (onLogout) onLogout();
@@ -132,6 +159,9 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
 
         {isAuthenticated && (
           <>
+            <Link to="/dashboard" className="navbar-link" onClick={close}>
+              Dashboard
+            </Link>
             <Link to="/profile" className="navbar-link" onClick={close}>
               Perfil
             </Link>

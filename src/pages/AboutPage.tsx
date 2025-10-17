@@ -16,29 +16,47 @@ export const AboutPage: React.FC = () => {
 
         <ul className="team-list" aria-label="Equipo Lumix">
           <li className="team-card">
-            <div className="avatar" aria-hidden="true">JP</div>
+            <div className="avatar" aria-hidden="true">JR</div>
             <div className="team-info">
-              <strong className="team-name">Joahn Riveros</strong>
+              <strong className="team-name">Johan Riveros</strong>
               <span className="team-role">Frontend Engineer</span>
               <p className="team-bio">Construye interfaces rápidas y accesibles.</p>
             </div>
           </li>
 
           <li className="team-card">
-            <div className="avatar" aria-hidden="true">MA</div>
+            <div className="avatar" aria-hidden="true">PB</div>
             <div className="team-info">
-              <strong className="team-name">María Álvarez</strong>
+              <strong className="team-name">Pablo Becerra</strong>
               <span className="team-role">Backend Engineer</span>
               <p className="team-bio">Diseña APIs seguras y escalables.</p>
             </div>
           </li>
 
           <li className="team-card">
-            <div className="avatar" aria-hidden="true">RS</div>
+            <div className="avatar" aria-hidden="true">NO</div>
             <div className="team-info">
-              <strong className="team-name">Rosa Sánchez</strong>
+              <strong className="team-name">Nathalia Ortiz</strong>
               <span className="team-role">Product</span>
               <p className="team-bio">Define la visión del producto y mejora la experiencia.</p>
+            </div>
+          </li>
+
+          <li className="team-card">
+            <div className="avatar" aria-hidden="true">FC</div>
+            <div className="team-info">
+              <strong className="team-name">Francisco Cardona</strong>
+              <span className="team-role">Database</span>
+              <p className="team-bio">Define la estructura de datos y optimiza consultas.</p>
+            </div>
+          </li>
+
+          <li className="team-card">
+            <div className="avatar" aria-hidden="true">DA</div>
+            <div className="team-info">
+              <strong className="team-name">Daniel Arias</strong>
+              <span className="team-role">Testing</span>
+              <p className="team-bio">Pruebas y aseguramiento de calidad.</p>
             </div>
           </li>
         </ul>

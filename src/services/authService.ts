@@ -54,6 +54,13 @@ class AuthService {
         '/api/v1/users/login',
         credentials,
       );
+      // Notificar al resto de la app que cambió el estado de auth
+      try {
+        window.dispatchEvent(new Event('authChanged'));
+      } catch (e) {
+        /* no bloquear en entornos no DOM */
+      }
+      
       return response;
     } catch (error) {
       const apiError = error as ApiError;
