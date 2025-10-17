@@ -1,12 +1,16 @@
 import React, { useState, FormEvent } from 'react';
 import authService from '../services/authService';
 import "../styles/ResetPasswordPage.scss";
+import { useNavigate } from "react-router-dom";
 
 export const ResetPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  /** Hook de navegación para redirigir al dashboard tras el login */
+    const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -86,7 +90,7 @@ export const ResetPasswordPage: React.FC = () => {
           </p>
 
           <div className="reset-links" style={{ marginTop: '1rem', textAlign: 'center' }}>
-            <a href="/login" className="link-back">
+            <a  className="link-back" onClick={() => navigate('/login')}>
               ← Volver al inicio de sesión
             </a>
           </div>
