@@ -9,6 +9,7 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { NewPasswordPage } from './pages/NewPasswordPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { DeleteAccountPage } from './pages/DeleteAccountPage';
+import { Dashboard } from './pages/Dashboard';
 
 const App: React.FC = () => {
 return (
@@ -24,6 +25,7 @@ return (
 	<Route path="/reset-password/new" element={<NewPasswordPage />} />
 	<Route path="/profile" element={<ProfilePage />} />
 	<Route path="/delete-account" element={<DeleteAccountPage />} />
+	<Route path="/dashboard" element={<Dashboard />} />
 </Routes>
 </main>
 </BrowserRouter>

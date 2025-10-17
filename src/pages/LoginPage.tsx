@@ -139,8 +139,8 @@ export const LoginPage: React.FC = () => {
                 Regístrate aquí
               </a>
             </p>
-            <a href="#" className="link-forgot">
-              ¿Tienes problemas para iniciar sesión? Haz click aquí
+            <a href="/reset-password" className="link-forgot">
+              ¿Olvidaste tu constraseña? Haz click aquí
             </a>
           </div>
         </section>

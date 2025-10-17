@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import '../styles/Navbar.scss';
+import authService from '../services/authService';
 
 type Props = {
   isAuthenticated?: boolean;
   onLogout?: () => void;
+};
+
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.split('; ').find((row) => row.startsWith(name + '='));
+  return match ? decodeURIComponent(match.split('=')[1]) : null;
+};
+
+const deleteCookie = (name: string) => {
+  document.cookie = `${name}=; Path=/; Max-Age=0;`;
 };
 
 export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout }) => {
@@ -12,27 +23,73 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(Boolean(isAuthProp));
 
   useEffect(() => {
+    let mounted = true;
+
     if (typeof isAuthProp === 'boolean') {
       setIsAuthenticated(isAuthProp);
       return;
     }
-    // Fallback: detect token in localStorage (ajusta clave a tu implementación)
-    const token = localStorage.getItem('authToken');
-    setIsAuthenticated(Boolean(token));
+
+    // Primero intenta leer token desde cookie (no HttpOnly)
+    const cookieToken = getCookie('authToken') ?? getCookie('token');
+    if (cookieToken) {
+      setIsAuthenticated(true);
+      // Verificación en background (si cookie expirada/invalid, actualizar estado)
+      authService
+        .checkAuth()
+        .then((user) => {
+          if (!mounted) return;
+          setIsAuthenticated(Boolean(user));
+        })
+        .catch(() => {
+          if (!mounted) return;
+          setIsAuthenticated(false);
+        });
+      return;
+    }
+
+    // Si no hay cookie legible, preguntar al backend (útil cuando cookie es HttpOnly)
+    authService
+      .checkAuth()
+      .then((user) => {
+        if (!mounted) return;
+        setIsAuthenticated(Boolean(user));
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setIsAuthenticated(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, [isAuthProp]);
 
   const toggle = () => setOpen((v) => !v);
   const close = () => setOpen(false);
 
-  const handleLogout = () => {
-    // comportamiento por defecto: eliminar token y ejecutar callback si existe
+  const handleLogout = async () => {
+    try {
+      // llamar endpoint de logout para invalidar cookie HttpOnly en servidor
+      await authService.logout();
+    } catch (e) {
+      console.error('logout error', e);
+    }
+
+    // eliminar cookies legibles por JS (si existen)
+    try {
+      deleteCookie('authToken');
+      deleteCookie('token');
+    } catch (e) {}
+
+    // fallback localStorage
     localStorage.removeItem('authToken');
+
     setIsAuthenticated(false);
     if (onLogout) onLogout();
     close();
-    // opcional: redirigir a la página de inicio
 
-     window.location.href = '/';
+    window.location.href = '/';
   };
 
   return (
@@ -57,21 +114,31 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
       </button>
 
       <nav className={`navbar-links ${open ? 'open' : ''}`} role="navigation">
-        <Link to="/" className="navbar-link" onClick={close}>
-          Inicio
-        </Link>
-        <Link to="/register" className="navbar-link" onClick={close}>
-          Registrarse
-        </Link>
+        
 
-        {isAuthenticated ? (
-          <button type="button" className="navbar-button" onClick={handleLogout}>
-            Cerrar sesión
-          </button>
-        ) : (
-          <Link to="/login" className="navbar-button" onClick={close}>
-            Iniciar sesión
-          </Link>
+        {!isAuthenticated && (
+          <>
+            <Link to="/" className="navbar-link" onClick={close}>
+              Inicio
+            </Link>
+            <Link to="/register" className="navbar-link" onClick={close}>
+              Registrarse
+            </Link>
+            <Link to="/login" className="navbar-button" onClick={close}>
+              Iniciar sesión
+            </Link>
+          </>
+        )}
+
+        {isAuthenticated && (
+          <>
+            <Link to="/profile" className="navbar-link" onClick={close}>
+              Perfil
+            </Link>
+            <button type="button" className="navbar-button" onClick={handleLogout}>
+              Cerrar sesión
+            </button>
+          </>
         )}
       </nav>
     </header>
