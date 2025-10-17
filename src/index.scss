@@ -1,0 +1,129 @@
+@use 'sass:color';
+@use './styles/variables' as vars;
+
+/* Exponer algunas variables CSS (útil para JS o componentes que usen CSS vars) */
+:root {
+  --lumix-purple: #{vars.$lumixPurple};
+  --primary-text: #{vars.$primaryText};
+  --bg: #{vars.$bg};
+  --card-bg: #{vars.$cardBg};
+
+  color-scheme: light dark;
+}
+
+/* Reset y accesibilidad */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: system-ui, Avenir, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+  background: linear-gradient(
+    180deg,
+    color.scale(vars.$bg, $lightness: 6%) 0%,
+    vars.$bg 100%
+  );
+  color: vars.$primaryText;
+  overflow-x: hidden;
+}
+
+/* Titulares y base tipográfica */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 700;
+  color: vars.$primaryText;
+}
+
+h1 { font-size: clamp(1.75rem, 4vw, 3.2rem); line-height: 1.05; }
+
+/* Enlaces */
+a {
+  color: vars.$lumixPurple;
+  font-weight: 500;
+  text-decoration: none;
+}
+a:hover,
+a:focus {
+  color: color.scale(vars.$lumixPurple, $lightness: -12%);
+  text-decoration: underline;
+}
+
+/* Botones por defecto */
+button {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.55em 1em;
+  background: color.scale(vars.$cardBg, $lightness: 6%);
+  color: vars.$primaryText;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+button:hover,
+button:focus {
+  transform: translateY(-2px);
+  background: color.scale(vars.$cardBg, $lightness: 2%);
+  outline: none;
+}
+
+/* Formularios básicos */
+input, textarea, select {
+  font: inherit;
+  color: vars.$primaryText;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 0.5rem 0.625rem;
+  border-radius: 8px;
+  outline: none;
+}
+input:focus, textarea:focus, select:focus {
+  box-shadow: 0 0 0 6px color.adjust(vars.$lumixPurple, $lightness: -30%);
+  border-color: color.scale(vars.$lumixPurple, $lightness: -10%);
+}
+
+/* Utilidades pequeñas */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Preferencias de color */
+@media (prefers-color-scheme: light) {
+  html, body {
+    background: linear-gradient(
+      180deg,
+      color.scale(vars.$bg, $lightness: 30%) 0%,
+      color.scale(vars.$bg, $lightness: 10%) 100%
+    );
+    color: color.scale(vars.$primaryText, $lightness: -90%);
+  }
+  a:hover { color: color.scale(vars.$lumixPurple, $lightness: 8%); }
+}
+
+/* Accesibilidad: ocultar visualmente pero accesible */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}

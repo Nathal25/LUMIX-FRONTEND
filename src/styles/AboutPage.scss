@@ -1,0 +1,125 @@
+@use 'sass:color';
+@use 'variables' as vars;
+
+/* Página Sobre nosotros */
+.about-page {
+  min-height: 100vh;
+  padding-top: 72px;
+  background: linear-gradient(
+    180deg,
+    color.scale(vars.$bg, $lightness: 6%) 0%,
+    vars.$bg 100%
+  );
+  color: vars.$primaryText;
+  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Hero */
+.about-hero {
+  padding: 3.5rem 1rem 1.5rem;
+  text-align: center;
+}
+
+.about-title {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  margin: 0 0 0.5rem;
+  color: vars.$primaryText;
+}
+
+.about-lead {
+  margin: 0 auto;
+  max-width: 760px;
+  color: color.scale(vars.$primaryText, $lightness: -10%);
+  font-size: 1.05rem;
+}
+
+/* Content */
+.about-content {
+  padding: 2rem 1rem 4rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: vars.$primaryText;
+}
+
+/* Equipo */
+.team-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.25rem 0;
+}
+
+.team-card {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 10px;
+  background: linear-gradient(180deg, color.scale(vars.$cardBg, $lightness: 6%), vars.$cardBg);
+  border: 1px solid color.scale(vars.$bg, $lightness: -6%);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  background: color.scale(vars.$lumixPurple, $lightness: 10%);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+
+.team-name {
+  display: block;
+  color: vars.$primaryText;
+  font-weight: 700;
+}
+
+.team-role {
+  display: block;
+  color: color.scale(vars.$primaryText, $lightness: -24%);
+  font-size: 0.9rem;
+  margin-top: 0.125rem;
+}
+
+.team-bio {
+  margin: 0.5rem 0 0 0;
+  color: color.scale(vars.$primaryText, $lightness: -18%);
+  font-size: 0.9rem;
+}
+
+/* CTA */
+.about-cta {
+  margin-top: 1.25rem;
+  text-align: center;
+  color: color.scale(vars.$primaryText, $lightness: -18%);
+}
+
+.about-cta a {
+  color: vars.$lumixPurple;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.about-cta a:hover {
+  color: color.scale(vars.$lumixPurple, $lightness: -10%);
+  text-decoration: underline;
+}
+
+/* Responsive tweaks */
+@media (max-width: 520px) {
+  .about-hero { padding-top: 2.5rem; }
+  .team-card { padding: 0.8rem; }
+  .avatar { width: 48px; height: 48px; font-size: 0.95rem; border-radius: 8px; }
+}

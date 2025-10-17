@@ -1,0 +1,178 @@
+@use 'sass:color';
+@use 'variables' as vars;
+
+/* ===== REGISTER PAGE ===== */
+
+.register-page {
+  min-height: 100vh;
+  padding-top: 72px; /* espacio para la navbar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    color.scale(vars.$bg, $lightness: 8%) 0%,
+    vars.$bg 60%,
+    color.scale(vars.$bg, $lightness: -6%) 100%
+  );
+  color: vars.$primaryText;
+  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Contenedor */
+.register-main {
+  width: 100%;
+  max-width: 980px;
+  padding: 2rem 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* Tarjeta */
+.register-card {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(
+    180deg,
+    color.scale(vars.$cardBg, $lightness: 6%),
+    vars.$cardBg
+  );
+  border: 1px solid color.scale(vars.$lumixPurple, $lightness: -50%);
+  border-radius: 12px;
+  padding: 1.75rem 1.5rem;
+  box-shadow: 0 14px 40px color.change(vars.$bg, $alpha: 0.45);
+  color: vars.$primaryText;
+}
+
+/* Título */
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: vars.$primaryText;
+  text-align: left;
+}
+
+/* Form */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: color.scale(vars.$primaryText, $lightness: -18%);
+  font-size: 0.95rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: color.scale(vars.$cardBg, $lightness: 8%);
+  color: vars.$primaryText;
+  font-size: 0.95rem;
+  box-shadow: inset 0 1px 0 color.change(vars.$bg, $alpha: 0.02);
+}
+
+.form-input::placeholder {
+  color: color.scale(vars.$primaryText, $lightness: -40%);
+}
+
+.form-input:focus {
+  outline: none;
+  background: color.scale(vars.$cardBg, $lightness: 10%);
+  box-shadow: 0 0 0 6px color.change(color.scale(vars.$lumixPurple, $lightness: -10%), $alpha: 0.12);
+  border-color: color.scale(vars.$lumixPurple, $lightness: -10%);
+}
+
+/* Errores y éxito */
+.form-errors {
+  margin: 0;
+  padding: 0.75rem;
+  list-style: disc;
+  background: color.change(#ef4444, $alpha: 0.06);
+  border: 1px solid color.change(#ef4444, $alpha: 0.18);
+  color: color.scale(#ef4444, $lightness: 20%);
+  border-radius: 8px;
+  font-size: 0.92rem;
+}
+
+.success {
+  margin: 0;
+  padding: 0.9rem;
+  border-radius: 8px;
+  background: color.change(#10b981, $alpha: 0.08);
+  border: 1px solid color.change(#10b981, $alpha: 0.18);
+  color: color.scale(#10b981, $lightness: 20%);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* CTA */
+.cta,
+.btn-register {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: vars.$lumixPurple;
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+  box-shadow: 0 12px 30px color.change(vars.$lumixPurple, $alpha: 0.14);
+}
+
+.cta:hover,
+.btn-register:hover {
+  transform: translateY(-3px);
+  background: color.scale(vars.$lumixPurple, $lightness: -10%);
+  box-shadow: 0 18px 36px color.change(vars.$lumixPurple, $alpha: 0.18);
+}
+
+/* Links */
+.register-links {
+  margin-top: 1rem;
+  font-size: 0.92rem;
+  color: color.scale(vars.$primaryText, $lightness: -24%);
+  text-align: left;
+}
+
+.link-login {
+  color: vars.$lumixPurple;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.link-login:hover {
+  text-decoration: underline;
+  color: color.scale(vars.$lumixPurple, $lightness: -6%);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .register-card {
+    padding: 1.25rem;
+    border-radius: 10px;
+  }
+  .card-title {
+    font-size: 1.25rem;
+  }
+  .form-input {
+    font-size: 0.92rem;
+  }
+  .cta,
+  .btn-register {
+    padding: 0.65rem;
+    font-size: 0.95rem;
+  }
+}
