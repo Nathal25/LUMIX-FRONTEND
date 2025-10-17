@@ -14,7 +14,7 @@ const App: React.FC = () => {
 return (
 <BrowserRouter>
 	<Navbar />
-	<main className="pt-16"> {/* add top padding equal to navbar height */}
+	<main className="pt-16"> 
 <Routes>
 <Route path="/" element={<HomePage />} />
 	<Route path="/about" element={<AboutPage />} />

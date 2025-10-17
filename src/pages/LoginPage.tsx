@@ -1,18 +1,64 @@
-import React from "react";
+import React, { useState, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import authService from "../services/authService";
 import "../styles/LoginPage.scss";
 
 export const LoginPage: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await authService.login({ email, password });
+      console.log("Login exitoso:", response);
+      
+      // Redirigir al dashboard o página principal
+      navigate("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Error al iniciar sesión");
+      console.error("Error en login:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="login-page">
-
       <main className="login-main">
         <section className="login-card">
           <h2 className="card-title">Iniciar sesión</h2>
 
-          <form className="login-form">
+          {error && (
+            <div className="error-message" style={{ 
+              color: 'red', 
+              marginBottom: '1rem',
+              padding: '0.5rem',
+              backgroundColor: '#ffe6e6',
+              borderRadius: '4px'
+            }}>
+              {error}
+            </div>
+          )}
+
+          <form className="login-form" onSubmit={handleSubmit}>
             <label className="form-label">
               Email:
-              <input className="form-input" type="email" placeholder="Ingresa tu correo" />
+              <input
+                className="form-input"
+                type="email"
+                placeholder="Ingresa tu correo"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+              />
             </label>
 
             <label className="form-label">
@@ -21,11 +67,15 @@ export const LoginPage: React.FC = () => {
                 className="form-input"
                 type="password"
                 placeholder="Ingresa tu contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
               />
             </label>
 
-            <button className="btn-login" type="submit">
-              Ingresar
+            <button className="btn-login" type="submit" disabled={loading}>
+              {loading ? "Ingresando..." : "Ingresar"}
             </button>
           </form>
 
