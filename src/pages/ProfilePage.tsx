@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router';
 import '../styles/ProfilePage.scss';
 
 type User = {
@@ -16,6 +17,7 @@ const MOCK_USER: User = {
 };
 
 export const ProfilePage: React.FC = () => {
+  const navigate = useNavigate();
   const [original] = useState<User>(MOCK_USER); // reemplaza con fetch real si hace falta
   const [user, setUser] = useState<User>({ ...original });
   const [errors, setErrors] = useState<string[]>([]);
@@ -46,6 +48,11 @@ export const ProfilePage: React.FC = () => {
     setUser({ ...original });
     setErrors([]);
     setSuccess(false);
+  };
+
+  const handleDelete = () => {
+    // redirige a la vista de eliminación de cuenta
+    navigate('/delete-account');
   };
 
   return (
@@ -115,6 +122,9 @@ export const ProfilePage: React.FC = () => {
           <div className="profile-actions">
             <button type="submit" className="btn-save">Guardar</button>
             <button type="button" className="btn-secondary" onClick={handleReset}>Restaurar</button>
+          </div>
+          <div>
+            <button type="button" className="btn-delete" onClick={handleDelete} title="Eliminar cuenta">Eliminar cuenta</button>
           </div>
         </form>
       </div>

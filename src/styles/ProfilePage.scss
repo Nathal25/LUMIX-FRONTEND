@@ -108,6 +108,7 @@
   margin-top: 0.25rem;
 }
 
+/* botón principal guardar */
 .btn-save {
   flex: 1;
   background: vars.$lumixPurple;
@@ -125,6 +126,7 @@
   background: color.scale(vars.$lumixPurple, $lightness: -10%);
 }
 
+/* boton secundario */
 .btn-secondary {
   background: transparent;
   color: color.scale(vars.$primaryText, $lightness: -24%);
@@ -137,6 +139,27 @@
   background: color.scale(vars.$cardBg, $lightness: 6%);
 }
 
+/* nuevo: botón eliminar (color pink) */
+.btn-delete {
+  background: vars.$pink;
+  color: #111; /* contraste sobre pink */
+  font-weight: 800;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 26px color.change(vars.$pink, $alpha: 0.14);
+  transition: transform 140ms ease, box-shadow 140ms ease, filter 120ms ease;
+}
+
+.btn-delete:hover,
+.btn-delete:focus {
+  transform: translateY(-3px);
+  filter: brightness(0.92);
+  box-shadow: 0 16px 34px color.change(vars.$pink, $alpha: 0.22);
+  outline: none;
+}
+
 /* responsive */
 @media (max-width: 520px) {
   .profile-card {
@@ -144,5 +167,8 @@
   }
   .profile-actions {
     flex-direction: column;
+  }
+  .btn-delete {
+    width: 100%;
   }
 }
