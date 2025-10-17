@@ -137,7 +137,33 @@ class AuthService {
         const apiError = error as ApiError;
         throw new Error(apiError.message || 'Error al solicitar recuperación de contraseña');
     }
-  } 
+  }
+  
+    /**
+     * Actualiza la información del usuario autenticado.
+     * 
+     * Permite modificar los campos: `firstName`, `lastName`, `age` y `email`.
+     * Esta operación requiere un token JWT válido (manejado automáticamente por cookies httpOnly).
+     * 
+     * @async
+     * @param {Partial<User>} updates - Objeto con los campos a actualizar. 
+     * Solo los campos definidos serán enviados al backend.
+     * @returns {Promise<{ message: string }>} Mensaje de éxito del servidor.
+     * @throws {Error} Si ocurre un error durante la actualización o el usuario no está autenticado.
+     */
+    async updateUser(updates: Partial<User>): Promise<{ message: string }> {
+        try {
+            const response = await apiClient.put<{ message: string }>(
+            '/api/v1/users/edit-me',
+            updates
+            );
+            return response;
+        } catch (error) {
+            const apiError = error as ApiError;
+            throw new Error(apiError.message || 'Error al actualizar la información del usuario');
+        }
+    }
+
 
 
 

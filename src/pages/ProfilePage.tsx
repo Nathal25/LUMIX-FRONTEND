@@ -1,59 +1,193 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
-import '../styles/ProfilePage.scss';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import "../styles/ProfilePage.scss";
+import authService from "../services/authService";
 
+/**
+ * Representa los datos de un usuario en el sistema.
+ * @interface
+ */
 type User = {
+  /** Nombre del usuario */
   firstName: string;
+  /** Apellido(s) del usuario */
   lastName: string;
+  /** Edad del usuario */
   age: number;
+  /** Dirección de correo electrónico del usuario */
   email: string;
 };
 
-const MOCK_USER: User = {
-  firstName: 'Juan',
-  lastName: 'Pérez',
-  age: 30,
-  email: 'juan.perez@example.com',
-};
-
+/**
+ * Componente de página de perfil de usuario.
+ * 
+ * Permite visualizar y editar la información personal del usuario autenticado.
+ * Los datos se cargan desde `localStorage` al montar el componente y se sincronizan
+ * con el backend al guardar cambios.
+ * 
+ * @component
+ * @returns {JSX.Element} Página de perfil con formulario de edición
+ * 
+ * @example
+ * ```tsx
+ * <ProfilePage />
+ * ```
+ */
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
-  const [original] = useState<User>(MOCK_USER); // reemplaza con fetch real si hace falta
-  const [user, setUser] = useState<User>({ ...original });
+  
+  /** Estado que mantiene los datos originales del usuario para restauración */
+  const [original, setOriginal] = useState<User | null>(null);
+  
+  /** Estado con los datos actuales del usuario (editables) */
+  const [user, setUser] = useState<User | null>(null);
+  
+  /** Lista de errores de validación */
   const [errors, setErrors] = useState<string[]>([]);
+  
+  /** Indica si la operación de guardado fue exitosa */
   const [success, setSuccess] = useState(false);
+  
+  /** Indica si hay una operación de guardado en curso */
+  const [loading, setLoading] = useState(false);
+  
+  /** Indica si se está cargando la información del usuario desde localStorage */
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
+  /**
+   * Efecto que se ejecuta al montar el componente.
+   * Carga los datos del usuario desde localStorage y redirige al login si no existen.
+   */
+  useEffect(() => {
+    /**
+     * Carga y parsea los datos del usuario desde localStorage.
+     * Si no hay datos o ocurre un error, redirige al usuario a la página de login.
+     * 
+     * @throws {Error} Si ocurre un error al parsear los datos JSON
+     */
+    const loadUserFromStorage = () => {
+      try {
+        const userString = localStorage.getItem("user");
+        if (userString) {
+          const userData = JSON.parse(userString);
+          const userProfile: User = {
+            firstName: userData.firstName || "",
+            lastName: userData.lastName || "",
+            age: userData.age || 0,
+            email: userData.email || "",
+          };
+          setOriginal(userProfile);
+          setUser(userProfile);
+        } else {
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Error al cargar usuario:", error);
+        navigate("/login");
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
+
+    loadUserFromStorage();
+  }, [navigate]);
+
+  /**
+   * Valida los datos del formulario del usuario.
+   * 
+   * @returns {string[]} Array de mensajes de error. Array vacío si no hay errores.
+   */
   const validate = (): string[] => {
+    if (!user) return ["Usuario no cargado"];
     const e: string[] = [];
-    if (!user.firstName.trim()) e.push('El nombre es requerido.');
-    if (!user.lastName.trim()) e.push('El apellido es requerido.');
-    if (!Number.isFinite(user.age) || user.age <= 0) e.push('La edad debe ser un número mayor que 0.');
+    if (!user.firstName.trim()) e.push("El nombre es requerido.");
+    if (!user.lastName.trim()) e.push("El apellido es requerido.");
+    if (!Number.isFinite(user.age) || user.age <= 0)
+      e.push("La edad debe ser un número mayor que 0.");
     return e;
   };
 
-  const handleSubmit = (ev: React.FormEvent) => {
+  /**
+   * Maneja el envío del formulario de actualización de perfil.
+   * Valida los datos, envía la petición al backend y actualiza localStorage.
+   * 
+   * @async
+   * @param {React.FormEvent} ev - Evento del formulario
+   * @returns {Promise<void>}
+   */
+  const handleSubmit = async (ev: React.FormEvent): Promise<void> => {
     ev.preventDefault();
+    if (!user) return;
+
     const v = validate();
     setErrors(v);
     setSuccess(false);
+
     if (v.length === 0) {
-      // aquí llamarías a la API para guardar los cambios
-      console.log('Guardando usuario:', user);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      setLoading(true);
+      try {
+        const res = await authService.updateUser({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          age: user.age,
+          email: user.email,
+        });
+
+        console.log(res.message);
+        
+        const userString = localStorage.getItem("user");
+        if (userString) {
+          const userData = JSON.parse(userString);
+          const updatedUser = {
+            ...userData,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            age: user.age,
+            email: user.email,
+          };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          setOriginal(user);
+        }
+
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } catch (err) {
+        console.error("Error al guardar:", err);
+        setErrors(["No se pudo actualizar la información del usuario."]);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  const handleReset = () => {
-    setUser({ ...original });
-    setErrors([]);
-    setSuccess(false);
+  /**
+   * Restaura los datos del usuario a su estado original.
+   * Limpia errores y mensajes de éxito.
+   */
+  const handleReset = (): void => {
+    if (original) {
+      setUser({ ...original });
+      setErrors([]);
+      setSuccess(false);
+    }
   };
 
-  const handleDelete = () => {
-    // redirige a la vista de eliminación de cuenta
-    navigate('/delete-account');
+  /**
+   * Redirige a la página de eliminación de cuenta.
+   */
+  const handleDelete = (): void => {
+    navigate("/delete-account");
   };
+
+  if (isLoadingUser || !user) {
+    return (
+      <div className="profile-page">
+        <div className="profile-card">
+          <p>Cargando perfil...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-page">
@@ -68,7 +202,9 @@ export const ProfilePage: React.FC = () => {
           </ul>
         )}
 
-        {success && <div className="profile-success">Datos actualizados correctamente.</div>}
+        {success && (
+          <div className="profile-success">Datos actualizados correctamente.</div>
+        )}
 
         <form className="profile-form" onSubmit={handleSubmit} noValidate>
           <label className="form-label" htmlFor="firstName">
@@ -103,28 +239,41 @@ export const ProfilePage: React.FC = () => {
               type="number"
               min={1}
               value={String(user.age)}
-              onChange={(e) => setUser({ ...user, age: Number(e.target.value) })}
+              onChange={(e) =>
+                setUser({ ...user, age: Number(e.target.value) })
+              }
               required
             />
           </label>
 
           <label className="form-label" htmlFor="email">
             Correo electrónico
-            <input
-              id="email"
-              className="form-input"
-              value={user.email}
-              disabled
-              aria-disabled="true"
-            />
+            <input id="email" className="form-input" value={user.email} disabled />
           </label>
 
           <div className="profile-actions">
-            <button type="submit" className="btn-save">Guardar</button>
-            <button type="button" className="btn-secondary" onClick={handleReset}>Restaurar</button>
+            <button type="submit" className="btn-save" disabled={loading}>
+              {loading ? "Guardando..." : "Guardar"}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handleReset}
+              disabled={loading}
+            >
+              Restaurar
+            </button>
           </div>
+
           <div>
-            <button type="button" className="btn-delete" onClick={handleDelete} title="Eliminar cuenta">Eliminar cuenta</button>
+            <button
+              type="button"
+              className="btn-delete"
+              onClick={handleDelete}
+              title="Eliminar cuenta"
+            >
+              Eliminar cuenta
+            </button>
           </div>
         </form>
       </div>
