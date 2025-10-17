@@ -1,0 +1,117 @@
+@use 'sass:color';
+@use 'variables' as vars;
+
+.site-footer {
+  background: linear-gradient(
+    180deg,
+    color.scale(vars.$bg, $lightness: 6%) 0%,
+    vars.$bg 100%
+  );
+  color: vars.$primaryText;
+  padding: 2.25rem 1rem;
+  border-top: 1px solid color.scale(vars.$bg, $lightness: -6%);
+  font-size: 0.95rem;
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* sitemap columns */
+.footer-sitemap {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.sitemap-section {
+  background: linear-gradient(180deg, color.scale(vars.$cardBg, $lightness: 6%), vars.$cardBg);
+  padding: 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.45);
+}
+
+.sitemap-title {
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+  color: vars.$primaryText;
+  font-size: 0.98rem;
+}
+
+.sitemap-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sitemap-list a,
+.sitemap-list a:visited {
+  color: color.scale(vars.$primaryText, $lightness: -18%);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.sitemap-list a:hover,
+.sitemap-list a:focus {
+  color: vars.$lumixPurple;
+  text-decoration: underline;
+}
+
+/* brand block */
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.footer-logo {
+  width: 110px;
+  height: auto;
+  display: block;
+}
+
+.footer-desc {
+  margin: 0;
+  color: color.scale(vars.$primaryText, $lightness: -18%);
+}
+
+.footer-copy {
+  color: color.scale(vars.$primaryText, $lightness: -30%);
+}
+
+/* responsive */
+@media (max-width: 880px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+  }
+  .footer-sitemap {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
+  .footer-brand {
+    margin-top: 0.75rem;
+    align-items: center;
+    text-align: center;
+  }
+  .footer-logo { margin: 0 auto; }
+}
+
+@media (max-width: 520px) {
+  .footer-sitemap {
+    grid-template-columns: 1fr;
+  }
+  .sitemap-section {
+    padding: 0.75rem;
+  }
+  .footer-container { gap: 1rem; }
+}
