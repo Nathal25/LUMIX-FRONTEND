@@ -125,7 +125,25 @@ class AuthService {
       throw new Error(apiError.message || 'Error al registrar usuario');
     }
   }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    try {
+        const response = await apiClient.post<{ message: string }>(
+        '/api/v1/users/forgot-password',
+        { email }
+        );
+        return response;
+    } catch (error) {
+        const apiError = error as ApiError;
+        throw new Error(apiError.message || 'Error al solicitar recuperación de contraseña');
+    }
+  } 
+
+
+
 }
+
+
 
 const authService = new AuthService();
 export default authService;
