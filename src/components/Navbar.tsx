@@ -141,8 +141,6 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
       </button>
 
       <nav className={`navbar-links ${open ? 'open' : ''}`} role="navigation">
-        
-
         {!isAuthenticated && (
           <>
             <Link to="/" className="navbar-link" onClick={close}>

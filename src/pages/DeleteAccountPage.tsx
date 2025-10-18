@@ -30,9 +30,13 @@ export const DeleteAccountPage: React.FC = () => {
     }
 
     setLoading(true);
-     try {
-      const response = await authService.deleteUser(password);
-      console.log('Cuenta eliminada:', response.message);
+    try {
+      await authService.deleteUser(password);
+      //const response = await authService.deleteUser(password);
+      //console.log('Cuenta eliminada:', response.message);
+      await authService.logout();
+      if (localStorage.getItem("user")) { localStorage.removeItem("user"); } // Clean up localStorage
+      window.dispatchEvent(new Event('authChanged')) // Change auth state globally
       setDone(true);
       navigate("/login");
     } catch (err: any) {
@@ -86,7 +90,7 @@ export const DeleteAccountPage: React.FC = () => {
               aria-describedby="confirmHelp"
             />
           </label>
-            <p id="confirmHelp" className="confirm-help">
+          <p id="confirmHelp" className="confirm-help">
             Para confirmar, escribe ELIMINAR (no sensible a mayúsculas/minúsculas).
           </p>
           <label className="form-label" htmlFor="password">
