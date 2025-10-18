@@ -126,8 +126,8 @@ class ApiClient {
    * @param endpoint - Ruta del recurso.
    * @returns Promesa con los datos de tipo `T`.
    */
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: "DELETE" });
+  async delete<T>(endpoint: string, body?: any): Promise<T> {
+    return this.request<T>(endpoint, { method: "DELETE", body: JSON.stringify(body) });
   }
 
   /**

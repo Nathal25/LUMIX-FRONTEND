@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/DeleteAccountPage.scss';
+import authService from '../services/authService';
+import { useNavigate } from 'react-router';
 
 export const DeleteAccountPage: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -7,6 +9,7 @@ export const DeleteAccountPage: React.FC = () => {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const navigate = useNavigate();
 
   const validate = (): string[] => {
     const e: string[] = [];
@@ -27,11 +30,17 @@ export const DeleteAccountPage: React.FC = () => {
     }
 
     setLoading(true);
-    // Simula llamada API para eliminar cuenta. Reemplaza por llamada real.
-    setTimeout(() => {
-      setLoading(false);
+     try {
+      const response = await authService.deleteUser(password);
+      console.log('Cuenta eliminada:', response.message);
       setDone(true);
-    }, 900);
+      navigate("/login");
+    } catch (err: any) {
+      setErrors([err.message || 'Error al eliminar la cuenta']);
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (done) {
