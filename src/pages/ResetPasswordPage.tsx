@@ -25,7 +25,7 @@ export const ResetPasswordPage: React.FC = () => {
       setEmail(''); // Limpiar el campo
     } catch (err: any) {
       setError(err.message || 'Error al enviar el correo de recuperación');
-      console.error('❌ Error:', err);
+      console.error('Error:', err);
     } finally {
       setLoading(false);
     }

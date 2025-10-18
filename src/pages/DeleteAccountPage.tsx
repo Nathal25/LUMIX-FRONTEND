@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/DeleteAccountPage.scss';
+import authService from '../services/authService';
+import { useNavigate } from 'react-router';
 
 export const DeleteAccountPage: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -7,6 +9,7 @@ export const DeleteAccountPage: React.FC = () => {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const navigate = useNavigate();
 
   const validate = (): string[] => {
     const e: string[] = [];
@@ -27,11 +30,21 @@ export const DeleteAccountPage: React.FC = () => {
     }
 
     setLoading(true);
-    // Simula llamada API para eliminar cuenta. Reemplaza por llamada real.
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await authService.deleteUser(password);
+      //const response = await authService.deleteUser(password);
+      //console.log('Cuenta eliminada:', response.message);
+      await authService.logout();
+      if (localStorage.getItem("user")) { localStorage.removeItem("user"); } // Clean up localStorage
+      window.dispatchEvent(new Event('authChanged')) // Change auth state globally
       setDone(true);
-    }, 900);
+      navigate("/login");
+    } catch (err: any) {
+      setErrors([err.message || 'Error al eliminar la cuenta']);
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (done) {
@@ -77,7 +90,7 @@ export const DeleteAccountPage: React.FC = () => {
               aria-describedby="confirmHelp"
             />
           </label>
-            <p id="confirmHelp" className="confirm-help">
+          <p id="confirmHelp" className="confirm-help">
             Para confirmar, escribe ELIMINAR (no sensible a mayúsculas/minúsculas).
           </p>
           <label className="form-label" htmlFor="password">

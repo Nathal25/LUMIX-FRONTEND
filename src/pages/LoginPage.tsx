@@ -69,7 +69,6 @@ export const LoginPage: React.FC = () => {
         localStorage.setItem("user", JSON.stringify(userData));
       }
 
-      
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message || "Error al iniciar sesión");

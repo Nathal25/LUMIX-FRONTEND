@@ -13,24 +13,24 @@ import { Dashboard } from './pages/Dashboard';
 import { Footer } from './components/Footer';
 
 const App: React.FC = () => {
-return (
-<BrowserRouter>
-	<Navbar />
-	<main className="pt-16"> 
-<Routes>
-<Route path="/" element={<HomePage />} />
-	<Route path="/about" element={<AboutPage />} />
-	<Route path="/login" element={<LoginPage />} />
-	<Route path="/register" element={<RegisterPage />} />
-	<Route path="/reset-password" element={<ResetPasswordPage />} />
-	<Route path="/recover-password" element={<NewPasswordPage />} />
-	<Route path="/profile" element={<ProfilePage />} />
-	<Route path="/delete-account" element={<DeleteAccountPage />} />
-	<Route path="/dashboard" element={<Dashboard />} />
-</Routes>
-</main>
-<Footer />
-</BrowserRouter>
-);
+	return (
+		<BrowserRouter>
+			<Navbar />
+			<main className="pt-16">
+				<Routes>
+					<Route path="/" element={<HomePage />} />
+					<Route path="/about" element={<AboutPage />} />
+					<Route path="/login" element={<LoginPage />} />
+					<Route path="/register" element={<RegisterPage />} />
+					<Route path="/reset-password" element={<ResetPasswordPage />} />
+					<Route path="/recover-password" element={<NewPasswordPage />} />
+					<Route path="/profile" element={<ProfilePage />} />
+					<Route path="/delete-account" element={<DeleteAccountPage />} />
+					<Route path="/dashboard" element={<Dashboard />} />
+				</Routes>
+			</main>
+			<Footer />
+		</BrowserRouter>
+	);
 };
 export default App;
