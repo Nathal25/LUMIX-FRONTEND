@@ -32,10 +32,7 @@ export const DeleteAccountPage: React.FC = () => {
     setLoading(true);
     try {
       await authService.deleteUser(password);
-      //const response = await authService.deleteUser(password);
-      //console.log('Cuenta eliminada:', response.message);
       await authService.logout();
-      if (localStorage.getItem("user")) { localStorage.removeItem("user"); } // Clean up localStorage
       window.dispatchEvent(new Event('authChanged')) // Change auth state globally
       setDone(true);
       navigate("/login");
