@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
@@ -9,6 +9,7 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { NewPasswordPage } from './pages/NewPasswordPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { DeleteAccountPage } from './pages/DeleteAccountPage';
+import { FavoritesPage } from './pages/FavoritesPage';
 import { Dashboard } from './pages/Dashboard';
 import { Footer } from './components/Footer';
 
@@ -27,6 +28,7 @@ const App: React.FC = () => {
 					<Route path="/profile" element={<ProfilePage />} />
 					<Route path="/delete-account" element={<DeleteAccountPage />} />
 					<Route path="/dashboard" element={<Dashboard />} />
+					<Route path="/favorites" element={<FavoritesPage />} /> {/* --Ruta provisional -- */}
 				</Routes>
 			</main>
 			<Footer />

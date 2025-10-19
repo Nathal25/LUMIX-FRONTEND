@@ -11,7 +11,7 @@ export const NewPasswordPage: React.FC = () => {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 👇 Aquí leemos los parámetros token y email
+  // Aquí leemos los parámetros token y email
   const { search } = useLocation();
   const query = new URLSearchParams(search);
   const token = query.get('token');
@@ -33,12 +33,7 @@ export const NewPasswordPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await authService.resetPassword(
-        token!,
-        email!,
-        password,
-        confirm
-      );
+      const response = await authService.resetPassword(token!, email!, password, confirm);
       console.log('Contraseña cambiada:', response.message);
       setSuccess(true);
       setPassword('');

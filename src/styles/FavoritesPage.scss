@@ -1,0 +1,111 @@
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+// New page favorites(Provisional) 
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+
+
+@use 'variables' as vars;
+@use 'sass:color';
+
+.favorites-page {
+  padding: 2rem;
+  background: vars.$bg;
+  min-height: 100vh;
+  color: vars.$primaryText;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+
+  .favorites-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: vars.$lumixPurple;
+    margin-bottom: 1rem;
+  }
+
+  .videos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .video-card {
+    background: color.scale(vars.$bg, $lightness: 10%);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(125, 43, 192, 0.35);
+    }
+
+    .video-thumbnail {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .video-info {
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      h3 {
+        font-size: 1rem;
+        color: vars.$primaryText;
+        margin: 0;
+      }
+
+      p {
+        font-size: 0.85rem;
+        color: color.scale(vars.$primaryText, $lightness: -20%);
+        margin: 0;
+      }
+    }
+  }
+
+  .no-videos {
+    color: color.scale(vars.$primaryText, $lightness: -20%);
+    font-size: 1.1rem;
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .loading-message,
+  .error-message {
+    color: vars.$lumixPurple;
+    font-weight: 500;
+    font-size: 1.1rem;
+  }
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+  .favorites-page {
+    padding: 1rem;
+
+    .videos-grid {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+
+    .video-card .video-thumbnail {
+      height: 140px;
+    }
+  }
+}

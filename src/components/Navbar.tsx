@@ -21,6 +21,16 @@ const deleteCookie = (name: string) => {
 export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout }) => {
   const [open, setOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(Boolean(isAuthProp));
+  // Provisional
+  // -----------------------------------
+  // -----------------------------------
+  // -----------------------------------
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  // -----------------------------------
+  // -----------------------------------
+  // -----------------------------------
+  // -----------------------------------
 
   useEffect(() => {
     let mounted = true;
@@ -104,7 +114,7 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
     try {
       deleteCookie('authToken');
       deleteCookie('token');
-    } catch (e) {}
+    } catch (e) { }
 
     // fallback localStorage
     localStorage.removeItem('authToken');
@@ -118,6 +128,22 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
 
     window.location.href = '/';
   };
+
+  // -----------------------------------
+  // -----------------------------------
+  // -----------------------------------
+  // Provisional
+  // -----------------------------------
+  // -----------------------------------
+  // -----------------------------------
+  const toggleSearch = () => setIsSearchOpen((prev) => !prev);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Buscar:', searchQuery);
+    // aquí puedes redirigir o hacer una petición de búsqueda
+  };
+  // -----------------------------------
 
   return (
     <header className="navbar">
@@ -163,6 +189,50 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
             <Link to="/profile" className="navbar-link" onClick={close}>
               Perfil
             </Link>
+            {/* Provisional */}
+            {/*  ----------------------------------- */}
+            {/*  ----------------------------------- */}
+            {/*  ----------------------------------- */}
+            {/*  ----------------------------------- */}
+            {/*  ----------------------------------- */}
+            {/* 🔍 Botón de búsqueda */}
+            <div className="navbar-search">
+              <button
+                type="button"
+                className={`search-button ${isSearchOpen ? 'active' : ''}`}
+                onClick={toggleSearch}
+                aria-label="Buscar"
+              >
+                <img src="/icons/busqueda.svg" alt="Buscar" />
+              </button>
+
+              <form
+                onSubmit={handleSearchSubmit}
+                className={`search-bar ${isSearchOpen ? 'visible' : ''}`}
+              >
+                <input
+                  type="text"
+                  placeholder="Buscar..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </form>
+            </div>
+
+            <div className="navbar-favorites">
+              <button
+                type="button"
+                className="favorite-button"
+                onClick={() => (window.location.href = '/favorites')}
+                aria-label="Favoritos"
+              >
+                <img src="/icons/love.svg" alt="Favoritos" />
+              </button>
+            </div>
+            {/*  ----------------------------------- */}
+            {/*  ----------------------------------- */}
+            {/*  ----------------------------------- */}
+            {/*  ----------------------------------- */}
             <button type="button" className="navbar-button" onClick={handleLogout}>
               Cerrar sesión
             </button>

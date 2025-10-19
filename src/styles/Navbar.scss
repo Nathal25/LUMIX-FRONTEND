@@ -153,3 +153,181 @@
   }
 }
 /* ======== FIN NAVBAR ======== */
+
+
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+// New styles for botton search anda favorites (Provisional) 
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+// -----------------------------------
+
+/* ======== BÚSQUEDA (solo visible cuando logueado) ======== */
+.navbar-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .search-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 200ms ease, opacity 200ms ease;
+    filter: invert(1) brightness(1.2);
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+      opacity: 0.9;
+    }
+
+    &.active {
+      transform: rotate(90deg);
+    }
+  }
+
+  .search-bar {
+    position: absolute;
+    right: 0;
+    top: 130%;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+
+    input {
+      width: 200px;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid color.scale(vars.$lumixPurple, $lightness: 10%);
+      background: vars.$bg;
+      color: vars.$primaryText;
+      outline: none;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: box-shadow 0.2s ease;
+
+      &:focus {
+        box-shadow: 0 6px 18px rgba(125, 43, 192, 0.25);
+      }
+
+      &::placeholder {
+        color: color.scale(vars.$primaryText, $lightness: -30%);
+      }
+    }
+
+    &.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+  .navbar-search {
+    width: 100%;
+    justify-content: center;
+
+    .search-bar {
+      position: static;
+      transform: none;
+      opacity: 1;
+      pointer-events: auto;
+      margin-top: 0.5rem;
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// -----------------------------------
+/* ======== FAVORITOS (solo visible cuando logueado) ======== */
+.navbar-favorites {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .favorite-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 200ms ease, opacity 200ms ease;
+    //filter: invert(1) brightness(1.2);
+
+    img {
+      width: 22px;
+      height: 22px;
+      transition: transform 180ms ease, filter 180ms ease;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+      opacity: 0.9;
+
+      img {
+        filter: drop-shadow(0 0 4px rgba(189, 189, 189, 0.6));
+      }
+    }
+
+    &:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+  }
+
+  /* Indicador (opcional) para mostrar que hay favoritos guardados */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 6px;
+    height: 6px;
+    background: vars.$lumixPurple;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  /* Si en el futuro quieres mostrar que hay favoritos activos */
+  &.has-favorites::after {
+    opacity: 1;
+  }
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+  .navbar-favorites {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.25rem;
+
+    .favorite-button img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}

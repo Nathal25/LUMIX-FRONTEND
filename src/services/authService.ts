@@ -1,5 +1,4 @@
 // src/services/authService.ts
-
 import apiClient, { ApiError } from './apiClient';
 
 /**
@@ -76,6 +75,7 @@ class AuthService {
   async logout(): Promise<void> {
     try {
       await apiClient.post('/api/v1/users/logout', {});
+      if (localStorage.getItem("user")) { localStorage.removeItem("user"); } // Clean up localStorage
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
@@ -184,12 +184,7 @@ class AuthService {
     }
   }
 
-  async resetPassword(
-    token: string,
-    email: string,
-    password: string,
-    confirmPassword: string
-  ): Promise<{ message: string }> {
+  async resetPassword(token: string, email: string, password: string, confirmPassword: string): Promise<{ message: string }> {
     try {
       const response = await apiClient.post<{ message: string }>(
         '/api/v1/users/reset-password',
