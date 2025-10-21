@@ -1,20 +1,8 @@
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// Modal para el video (provisional)
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-
-// src/components/VideoModal.tsx
 import React, { useRef, useState, useEffect } from 'react';
 import '../styles/VideoModal.scss';
 import { FaPlay, FaPause, FaForward, FaBackward, FaExpand, FaClosedCaptioning, FaHeart } from 'react-icons/fa';
 import apiClient from '../services/apiClient';
+import { useNavigate } from 'react-router'; // added
 
 interface VideoModalProps {
   videoUrl: string;
@@ -23,22 +11,34 @@ interface VideoModalProps {
   onClose: () => void;
 }
 
-// Type of data for a movie/video
 interface Favorite {
-  userId: string,
-  movieId: string,
-  _id: string,
-  createdAt: string,
-  updatedAt: string,
+  userId: string;
+  movieId: string;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
 }
+
+const formatTime = (s: number) => {
+  if (!isFinite(s)) return '0:00';
+  const minutes = Math.floor(s / 60);
+  const seconds = Math.floor(s % 60).toString().padStart(2, '0');
+  return `${minutes}:${seconds}`;
+};
 
 const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClose }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const progressRef = useRef<HTMLDivElement | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const navigate = useNavigate(); // added
+
   const [isPlaying, setIsPlaying] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [loadingPoster, setLoadingPoster] = useState(true);
 
-  // 🧩 Cargar el estado inicial del favorito
   useEffect(() => {
     const fetchFavoriteStatus = async () => {
       const userString = localStorage.getItem('user');
@@ -47,16 +47,8 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
       if (!userId || !movieId) return;
 
       try {
-        // Llamar al backend para obtener los favoritos de ese usuario
         const favorites = await apiClient.get<Favorite[]>(`/api/v1/favorites/user/${userId}`);
-
-        console.log('User ID:', userId);
-        console.log('Favoritos obtenidos:', favorites);
-        console.log('Movie ID actual:', movieId);
-
-        // Verificar si esta película ya está entre sus favoritos
         const existingFavorite = favorites.find((fav: Favorite) => fav.movieId === movieId);
-
         if (existingFavorite) {
           setIsFavorite(true);
           setFavoriteId(existingFavorite._id);
@@ -65,19 +57,101 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
           setFavoriteId(null);
         }
       } catch (error) {
-        console.error('Error al verificar el estado del favorito:', error);
+        console.error('Error al verificar favorito:', error);
       }
     };
 
     fetchFavoriteStatus();
   }, [movieId]);
 
-  // ▶️ Reproducir / Pausar
+  // keyboard controls
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === ' ' && document.activeElement !== (document.querySelector('.custom-controls button') as HTMLElement)) {
+        e.preventDefault();
+        togglePlay();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying]);
+
+  // set up loaded / timeupdate handlers
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const onLoaded = () => {
+      setDuration(video.duration || 0);
+      setLoadingPoster(false);
+      if (video.paused && isPlaying) {
+        video.play().catch(() => {});
+      }
+    };
+    const onTime = () => {
+      // leave as a fallback; RAF loop will provide smooth updates while playing
+      setCurrent(video.currentTime || 0);
+    };
+    const onEnd = () => setIsPlaying(false);
+
+    video.addEventListener('loadedmetadata', onLoaded);
+    video.addEventListener('timeupdate', onTime);
+    video.addEventListener('ended', onEnd);
+
+    // poster fallback
+    const posterTimeout = setTimeout(() => {
+      if (loadingPoster) setLoadingPoster(false);
+    }, 8000);
+
+    return () => {
+      video.removeEventListener('loadedmetadata', onLoaded);
+      video.removeEventListener('timeupdate', onTime);
+      video.removeEventListener('ended', onEnd);
+      clearTimeout(posterTimeout);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // RAF loop for smooth progress updates while playing
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const tick = () => {
+      if (video) {
+        setCurrent(video.currentTime || 0);
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    // start RAF when playing and video ready
+    if (!video.paused && isPlaying) {
+      rafRef.current = requestAnimationFrame(tick);
+    }
+
+    // ensure RAF restarts when isPlaying changes to true
+    if (isPlaying && video.paused) {
+      // try to play
+      video.play().catch(() => {});
+      rafRef.current = requestAnimationFrame(tick);
+    }
+
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+    // depend on isPlaying and videoRef.current
+  }, [isPlaying, duration]);
+
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
     if (video.paused) {
-      video.play();
+      video.play().catch(() => {});
       setIsPlaying(true);
     } else {
       video.pause();
@@ -85,29 +159,28 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     }
   };
 
-  // ⏩ Adelantar 10s
   const handleForward = () => {
-    if (videoRef.current) videoRef.current.currentTime += 10;
+    if (videoRef.current) videoRef.current.currentTime = Math.min((videoRef.current.currentTime || 0) + 10, duration);
   };
 
-  // ⏪ Retroceder 10s
   const handleBackward = () => {
-    if (videoRef.current) videoRef.current.currentTime -= 10;
+    if (videoRef.current) videoRef.current.currentTime = Math.max((videoRef.current.currentTime || 0) - 10, 0);
   };
 
-  // 🔲 Pantalla completa
-  const handleFullscreen = () => {
+  const handleFullscreen = async () => {
     const video = videoRef.current;
-    if (video) {
+    if (!video) return;
+    try {
       if (document.fullscreenElement) {
-        document.exitFullscreen();
+        await document.exitFullscreen();
       } else {
-        video.requestFullscreen();
+        await video.requestFullscreen();
       }
+    } catch (err) {
+      console.warn('Fullscreen error', err);
     }
   };
 
-  // 💬 Subtítulos (si existen)
   const toggleCaptions = () => {
     const video = videoRef.current;
     if (video && video.textTracks.length > 0) {
@@ -116,7 +189,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     }
   };
 
-  // ❤️ Agregar o quitar de favoritos
   const toggleFavorite = async () => {
     const userString = localStorage.getItem('user');
     const userId = userString ? JSON.parse(userString).id : null;
@@ -141,36 +213,112 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     }
   };
 
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClose();
+  };
 
+  const handleContentClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const pr = progressRef.current;
+    const video = videoRef.current;
+    if (!pr || !video) return;
+    const rect = pr.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const pct = Math.max(0, Math.min(1, x / rect.width));
+    video.currentTime = pct * duration;
+    setCurrent(pct * duration); // immediate UI update
+  };
+
+  // navigate to a dedicated movie page (close modal first)
+  const goToDetails = () => {
+    try {
+      onClose();
+    } catch (e) {
+      /* ignore */
+    }
+    // route for movie details - adjust if your route is different
+    navigate(`/movies/${movieId}`);
+  };
 
   return (
-    <div className="video-modal-overlay" onClick={onClose}>
-      <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button" onClick={onClose}>×</button>
+    <div className="video-modal-overlay" onClick={handleOverlayClick} role="dialog" aria-modal="true" aria-label={`Reproductor: ${title}`}>
+      <div className="video-modal-content" onClick={handleContentClick}>
+        <button className="close-button" aria-label="Cerrar" onClick={onClose}>×</button>
 
-        <video ref={videoRef} autoPlay className="video-player">
-          <source src={videoUrl} type="video/mp4" />
-          <track
-            kind="subtitles"
-            srcLang="es"
-            label="Español"
-            src="/subtitulos.vtt"
-            default
-          />
-          Tu navegador no soporta la reproducción de video.
-        </video>
+        <div className="video-area">
+          {/* Loading poster overlay */}
+          {loadingPoster && (
+            <div className="loading-poster" aria-hidden="true">
+              <div className="vm-spinner" />
+              <div className="loading-text">Cargando video…</div>
+            </div>
+          )}
 
-        {/* 🎮 Controles personalizados */}
-        <div className="custom-controls">
-          <button onClick={handleBackward}><FaBackward /></button>
-          <button onClick={togglePlay}>{isPlaying ? <FaPause /> : <FaPlay />}</button>
-          <button onClick={handleForward}><FaForward /></button>
-          <button onClick={handleFullscreen}><FaExpand /></button>
-          <button onClick={toggleCaptions}><FaClosedCaptioning /></button>
-          <button className={isFavorite ? 'favorite active' : 'favorite'} onClick={toggleFavorite}><FaHeart /></button>
+          <video
+            ref={videoRef}
+            autoPlay
+            className={`video-player ${loadingPoster ? 'hidden' : ''}`}
+            controls={false}
+            preload="metadata"
+          >
+            <source src={videoUrl} type="video/mp4" />
+            <track
+              kind="subtitles"
+              srcLang="es"
+              label="Español"
+              src="/subtitulos.vtt"
+            />
+            Tu navegador no soporta la reproducción de video.
+          </video>
+
+          <div className="media-overlay" aria-hidden={loadingPoster}>
+            <div className="progress" ref={progressRef} onClick={handleProgressClick}>
+              <div className="progress-bar" style={{ width: `${duration ? (current / duration) * 100 : 0}%` }} />
+            </div>
+
+            <div className="controls-row">
+              <div className="left-controls">
+                <button className="ctrl" onClick={handleBackward} aria-label="Retroceder 10 segundos"><FaBackward /></button>
+                <button className="ctrl play" onClick={togglePlay} aria-label={isPlaying ? 'Pausar' : 'Reproducir'}>
+                  {isPlaying ? <FaPause /> : <FaPlay />}
+                </button>
+                <button className="ctrl" onClick={handleForward} aria-label="Adelantar 10 segundos"><FaForward /></button>
+              </div>
+
+              <div className="center-info">
+                <span className="time">{formatTime(current)} / {formatTime(duration)}</span>
+                {/* <h3 className="video-title-inline" title={title}>{title}</h3> */}
+              </div>
+
+              <div className="right-controls">
+                <button className="ctrl" onClick={handleFullscreen} aria-label="Pantalla completa"><FaExpand /></button>
+                <button className="ctrl" onClick={toggleCaptions} aria-label="Subtítulos"><FaClosedCaptioning /></button>
+                <button className={`ctrl favorite ${isFavorite ? 'active' : ''}`} onClick={toggleFavorite} aria-pressed={isFavorite} aria-label={isFavorite ? 'Quitar favorito' : 'Añadir favorito'}>
+                  <FaHeart />
+                </button>
+              </div>
+            </div>
+
+            {/* NEW: preview footer with link to dedicated page */}
+           
+          </div>
         </div>
 
-        <h2 className="video-title">{title}</h2>
+        <div className="meta-row">
+          <h2 className="video-title">{title}</h2>
+           <div className="preview-actions">
+            <button className="more-details" onClick={goToDetails} aria-label={`Ver ficha completa`}>
+            Ver ficha completa
+            </button>
+        </div>
+          <p className="video-actions-hint">Presiona espacio para reproducir/pausar — Esc para cerrar</p>
+        </div>
+
+        
       </div>
     </div>
   );

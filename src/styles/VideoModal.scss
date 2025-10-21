@@ -1,71 +1,276 @@
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// New styles para el modal del video (Provisional) 
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
+@use 'sass:color';
+@use 'variables' as vars;
+
+/* Loading poster overlay */
+.loading-poster {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.55));
+  z-index: 8;
+  color: vars.$primaryText;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* small spinner for modal */
+.vm-spinner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 6px solid color.scale(vars.$cardBg, $lightness: 12%);
+  border-top-color: vars.$lumixPurple;
+  animation: vm-spin 900ms linear infinite;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+}
+
+/* loading text */
+.loading-text {
+  font-size: 0.95rem;
+  color: color.scale(vars.$primaryText, $lightness: -18%);
+}
+
+/* hide video while loading to avoid poster flash */
+.video-player.hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* spinner animation */
+@keyframes vm-spin {
+  to { transform: rotate(360deg); }
+}
 
 .video-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.8));
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 2500;
+  padding: 2rem;
+  backdrop-filter: blur(6px) saturate(120%);
 }
 
+/* modal card */
 .video-modal-content {
+  width: min(1100px, 96%);
+  max-height: 90vh;
+  background: linear-gradient(180deg, color.scale(vars.$cardBg, $lightness: 6%), vars.$cardBg);
+  border-radius: 14px;
+  overflow: hidden;
   position: relative;
-  background: #111;
-  padding: 1.5rem;
-  border-radius: 12px;
-  max-width: 800px;
-  width: 90%;
-  text-align: center;
-  animation: fadeIn 0.3s ease;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+  border: 1px solid color.scale(vars.$bg, $lightness: -6%);
+  display: flex;
+  flex-direction: column;
+  animation: modalIn 260ms cubic-bezier(.2,.9,.3,1);
 }
 
-.video-player {
-  width: 20%;
-  height: auto;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-}
-
-.video-title {
-  color: white;
-  margin-top: 0.5rem;
-}
-
+/* close button */
 .close-button {
   position: absolute;
-  top: 0.75rem;
-  right: 1rem;
-  font-size: 2rem;
-  background: none;
+  right: 12px;
+  top: 12px;
+  z-index: 10;
+  background: transparent;
   border: none;
-  color: white;
+  color: vars.$primaryText;
+  font-size: 1.35rem;
   cursor: pointer;
-  transition: color 0.2s ease;
+  padding: 6px;
+  border-radius: 8px;
+}
+.close-button:hover {
+  background: rgba(255,255,255,0.02);
+}
 
-  &:hover {
-    color: #ff3b3b;
+/* video area */
+.video-area {
+  position: relative;
+  width: 100%;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* video element */
+.video-player {
+  width: 100%;
+  max-height: 62vh;
+  height: auto;
+  background: #000;
+  display: block;
+  outline: none;
+}
+
+/* overlay with controls */
+.media-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.45));
+}
+
+/* progress bar: remove long transition so RAF updates are smooth and uniform */
+.progress {
+  height: 8px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, vars.$lumixPurple, color.scale(vars.$lumixPurple, $lightness: -8%));
+  transition: width 0ms linear; /* immediate updates from RAF produce smooth motion */
+  will-change: width;
+}
+
+/* controls row */
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* left / right groups */
+.left-controls,
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* control buttons */
+.ctrl {
+  background: rgba(255,255,255,0.03);
+  border: none;
+  color: vars.$primaryText;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 140ms ease, background 120ms ease;
+  font-size: 1rem;
+}
+.ctrl:hover {
+  transform: translateY(-3px);
+  background: rgba(255,255,255,0.06);
+}
+
+/* play button accent */
+.ctrl.play {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(180deg, vars.$lumixPurple, color.scale(vars.$lumixPurple, $lightness: -8%));
+  color: #fff;
+  box-shadow: 0 10px 28px color.change(vars.$lumixPurple, $alpha: 0.18);
+}
+.ctrl.play:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* favorite button */
+.ctrl.favorite {
+  color: vars.$primaryText;
+  background: rgba(255,255,255,0.03);
+}
+.ctrl.favorite.active {
+  background: linear-gradient(180deg, vars.$pink, color.scale(vars.$pink, $lightness: -8%));
+  color: #111;
+  box-shadow: 0 10px 28px color.change(vars.$pink, $alpha: 0.16);
+}
+
+/* center info */
+.center-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: color.scale(vars.$primaryText, $lightness: -6%);
+}
+.time { font-size: 0.9rem; color: color.scale(vars.$primaryText, $lightness: -28%); }
+.video-title-inline { margin: 0; font-weight: 700; font-size: 0.98rem; color: vars.$primaryText; }
+
+/* meta row */
+.meta-row {
+  padding: 0.9rem 1rem;
+  border-top: 1px solid rgba(255,255,255,0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.video-title { margin: 0; font-size: 1.05rem; font-weight: 800; color: vars.$primaryText; }
+.video-actions-hint { margin: 0; color: color.scale(vars.$primaryText, $lightness: -28%); font-size: 0.88rem; }
+
+/* Preview actions under controls (new) */
+.preview-actions {
+  display: flex;
+  justify-content: justify;
+  padding-top: 0.6rem;
+}
+
+.more-details {
+  background: linear-gradient(90deg, vars.$lumixPurple, color.scale(vars.$lumixPurple, $lightness: -8%));
+  color: #fff;
+  border: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 28px color.change(vars.$lumixPurple, $alpha: 0.14);
+  transition: transform 140ms ease, filter 120ms ease;
+}
+
+.more-details:hover,
+.more-details:focus {
+  transform: translateY(-3px);
+  filter: brightness(0.95);
+  outline: none;
+  border: 1px solid vars.$lumixPurple;
+}
+
+/* small adjustment for mobile: full width */
+@media (max-width: 520px) {
+  .more-details {
+    width: 100%;
   }
 }
 
-/* ❤️ Favorito activo */
-.favorite.active {
-  background: #ff3b3b;
-  color: white;
+/* animations */
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.995); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+/* responsive */
+@media (max-width: 920px) {
+  .video-modal-content { width: 95%; }
+  .controls-row { gap: 0.6rem; }
+  .ctrl { width: 44px; height: 44px; }
+  .ctrl.play { width: 48px; height: 48px; }
+  .video-player { max-height: 56vh; }
+}
+
+@media (max-width: 520px) {
+  .video-player { max-height: 48vh; }
+  .center-info { display: none; }
+  .meta-row { padding: 0.75rem; }
 }

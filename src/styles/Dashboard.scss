@@ -1,12 +1,17 @@
 @use 'sass:color';
 @use 'variables' as vars;
 
+/* ===========================
+   Dashboard - estilos refactor
+   =========================== */
+
 .dashboard-page {
   min-height: 100vh;
   padding-top: 72px;
+  padding-bottom: 48px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   background: linear-gradient(
     180deg,
     color.scale(vars.$bg, $lightness: 8%) 0%,
@@ -16,6 +21,207 @@
   font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Título principal de la página - ahora centrado */
+.dashboard-title {
+  width: 100%;
+  max-width: 1200px;
+  margin: 1.25rem 1rem 0;
+  font-size: clamp(1.25rem, 2.8vw, 1.75rem);
+  font-weight: 800;
+  color: vars.$primaryText;
+  text-align: center; /* cambio: centrar título */
+}
+
+/* Loading wrapper (spinner + texto) */
+.loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 720px;
+  margin: 2.5rem auto;
+  padding: 1rem;
+}
+
+/* Spinner circular sencillo */
+.spinner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 6px solid color.scale(vars.$cardBg, $lightness: 12%);
+  border-top-color: vars.$lumixPurple;
+  animation: spin 900ms linear infinite;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+
+/* small spin animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Ajuste del mensaje de carga */
+.loading-message {
+  margin: 0;
+  color: color.scale(vars.$primaryText, $lightness: -18%);
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* Grid de videos / tarjetas */
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 1rem auto;
+  padding: 0 1rem;
+}
+
+/* Item individual */
+.video-item {
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: transform 220ms ease, box-shadow 220ms ease;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, color.scale(vars.$cardBg, $lightness: 6%), vars.$cardBg);
+  border: 1px solid color.scale(vars.$bg, $lightness: -6%);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.45);
+  padding: 0.5rem;
+}
+
+.video-item:hover,
+.video-item:focus-within {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.55);
+}
+
+/* Miniatura: ocupar todo el ancho del contenedor */
+.video-thumbnail {
+  width: 100%;
+  height: 160px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+  background-color: color.scale(vars.$cardBg, $lightness: 6%);
+}
+
+/* Título del video debajo de la miniatura */
+.video-name {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: vars.$primaryText;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mensajes */
+.loading-message,
+.error-message,
+.no-videos {
+  width: 100%;
+  max-width: 1200px;
+  padding: 1rem;
+  margin: 1rem auto;
+  color: color.scale(vars.$primaryText, $lightness: -18%);
+  text-align: center;
+}
+
+/* Animación pequeña al aparecer */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------------------------
+   Load more / Cargar más
+   --------------------------- */
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0 2rem;
+  width: 100%;
+}
+
+.btn-load-more {
+  background: linear-gradient(90deg, vars.$lumixPurple, color.scale(vars.$lumixPurple, $lightness: -8%));
+  color: vars.$primaryText;
+  border: none;
+  padding: 0.65rem 1.2rem;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 36px color.change(vars.$lumixPurple, $alpha: 0.14);
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 120ms ease, opacity 120ms ease;
+  min-width: 180px;
+  text-align: center;
+}
+
+.btn-load-more:hover {
+  transform: translateY(-4px);
+  filter: brightness(0.95);
+}
+
+.btn-load-more:focus {
+  outline: none;
+  box-shadow: 0 16px 48px color.change(vars.$lumixPurple, $alpha: 0.2);
+}
+
+.btn-load-more[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* mensaje cuando no hay más */
+.no-more {
+  color: color.scale(vars.$primaryText, $lightness: -24%);
+  text-align: center;
+  font-size: 0.98rem;
+  padding: 0.6rem 0;
+}
+
+/* Responsive tweaks */
+@media (max-width: 680px) {
+  .video-thumbnail {
+    height: 140px;
+  }
+  .dashboard-title {
+    font-size: 1.1rem;
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .video-thumbnail {
+    height: 120px;
+  }
+  .video-name {
+    font-size: 0.95rem;
+  }
+}
+
+/* ===========================
+   ANTES: estilos previos (comentados por si se necesitan de nuevo)
+   =========================== */
+
+/*
 .dashboard-card {
   width: 100%;
   max-width: 720px;
@@ -49,7 +255,6 @@
   margin-right: auto;
 }
 
-/* pequeña guía visual */
 .dashboard-card::before {
   content: '';
   display: block;
@@ -60,40 +265,9 @@
   background: linear-gradient(90deg, vars.$lumixPurple, color.scale(vars.$lumixPurple, $lightness: -8%));
   opacity: 0.95;
 }
+*/
 
-/* animaciones */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* responsive */
-@media (max-width: 520px) {
-  .dashboard-card {
-    padding: 1.25rem;
-  }
-  .coming-title { font-size: 1.5rem; }
-  .coming-subtitle { font-size: 0.95rem; }
-}
-
-
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// New styles for video grid (Provisional) Creo que este no es necesario
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
+/* ANTERIOR: reglas provisionales del grid y miniaturas originales (comentadas)
 .videos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -125,4 +299,4 @@
   font-size: 1rem;
   color: vars.$primaryText;
 }
-// -----------------------------------
+*/
