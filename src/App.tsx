@@ -12,6 +12,7 @@ import { DeleteAccountPage } from './pages/DeleteAccountPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import { Dashboard } from './pages/Dashboard';
 import { Footer } from './components/Footer';
+import MoviePage from './pages/MoviePage';
 
 const App: React.FC = () => {
 	return (
@@ -29,6 +30,7 @@ const App: React.FC = () => {
 					<Route path="/delete-account" element={<DeleteAccountPage />} />
 					<Route path="/dashboard" element={<Dashboard />} />
 					<Route path="/favorites" element={<FavoritesPage />} /> {/* --Ruta provisional -- */}
+					<Route path="/movies/:id" element={<MoviePage />} />
 				</Routes>
 			</main>
 			<Footer />

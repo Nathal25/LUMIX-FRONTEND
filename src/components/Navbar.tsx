@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import '../styles/Navbar.scss';
 import authService from '../services/authService';
@@ -21,16 +21,10 @@ const deleteCookie = (name: string) => {
 export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout }) => {
   const [open, setOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(Boolean(isAuthProp));
-  // Provisional
-  // -----------------------------------
-  // -----------------------------------
-  // -----------------------------------
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  // Provisional: búsqueda (refactor)
   const [searchQuery, setSearchQuery] = useState('');
-  // -----------------------------------
-  // -----------------------------------
-  // -----------------------------------
-  // -----------------------------------
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchRef = useRef<HTMLDivElement | null>(null); // ref para detectar clicks fuera
 
   useEffect(() => {
     let mounted = true;
@@ -145,6 +139,30 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
   };
   // -----------------------------------
 
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent | TouchEvent) => {
+      if (!isSearchOpen) return;
+      const target = e.target as Node | null;
+      if (!searchRef.current || !target) return;
+      if (!searchRef.current.contains(target)) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsSearchOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('touchstart', handleOutside);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('touchstart', handleOutside);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [isSearchOpen]);
+
   return (
     <header className="navbar">
       <Link to="/" onClick={close}>
@@ -196,38 +214,41 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
             {/*  ----------------------------------- */}
             {/*  ----------------------------------- */}
             {/* 🔍 Botón de búsqueda */}
-            <div className="navbar-search">
+            <div className="navbar-search" ref={searchRef}>
               <button
                 type="button"
-                className={`search-button ${isSearchOpen ? 'active' : ''}`}
-                onClick={toggleSearch}
-                aria-label="Buscar"
+                className={`search-toggle ${isSearchOpen ? 'active' : ''}`}
+                aria-expanded={isSearchOpen}
+                aria-label={isSearchOpen ? 'Cerrar búsqueda' : 'Abrir búsqueda'}
+                onClick={() => setIsSearchOpen((v) => !v)}
               >
                 <img src="/icons/busqueda.svg" alt="Buscar" />
               </button>
 
-              <form
-                onSubmit={handleSearchSubmit}
-                className={`search-bar ${isSearchOpen ? 'visible' : ''}`}
-              >
-                <input
-                  type="text"
-                  placeholder="Buscar..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </form>
+              {isSearchOpen && (
+                <div className="search-panel" role="dialog" aria-label="Búsqueda">
+                  <form onSubmit={(e) => { e.preventDefault(); /* ejecutar búsqueda */ }}>
+                    <input
+                      className="search-input"
+                      placeholder="Buscar..."
+                      autoFocus
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </form>
+                  {/* opcional: resultados */}
+                </div>
+              )}
             </div>
 
             <div className="navbar-favorites">
-              <button
-                type="button"
+                <Link
+                to="/favorites"
                 className="favorite-button"
-                onClick={() => (window.location.href = '/favorites')}
                 aria-label="Favoritos"
-              >
+                >
                 <img src="/icons/love.svg" alt="Favoritos" />
-              </button>
+                </Link>
             </div>
             {/*  ----------------------------------- */}
             {/*  ----------------------------------- */}
