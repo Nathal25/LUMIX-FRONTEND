@@ -1,22 +1,21 @@
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// All here is provisional, is an example of how to fetch and display videos from backend (The preview images)
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-// -----------------------------------
-
 import React, { useState, useEffect } from 'react';
 import '../styles/Dashboard.scss';
 import apiClient from '../services/apiClient';
 import VideoModal from '../components/VideoModal';
 
-// Type of data for a movie/video
+/**
+ * Represents a movie/video object with metadata.
+ * 
+ * @interface Movie
+ * @property {string} _id - Unique database identifier
+ * @property {number} pexelsId - Pexels API identifier for the video
+ * @property {string} title - Title of the movie/video
+ * @property {string} imageUrl - URL of the thumbnail image
+ * @property {string} videoUrl - URL of the video file
+ * @property {number} duration - Duration of the video in seconds
+ * @property {string} author - Author or creator of the video
+ * @property {string} [description] - Optional description of the video
+ */
 interface Movie {
   _id: string;
   pexelsId: number;
@@ -28,7 +27,23 @@ interface Movie {
   description?: string;
 }
 
+/**
+ * Dashboard Component
+ * 
+ * Displays a grid of popular movies/videos with infinite scroll loading capability.
+ * Allows users to view video details in a modal when clicking on a video thumbnail.
+ * 
+ * Features:
+ * - Lazy loading with "Load more" button
+ * - Video modal for playback
+ * - Loading and error states
+ * - Responsive grid layout
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered dashboard with video grid and modal
+ */
 export const Dashboard: React.FC = () => {
+  /** Number of videos to load per page/request */
   const PAGE_STEP = 12;
 
   const [videos, setVideos] = useState<Movie[]>([]);
@@ -39,7 +54,15 @@ export const Dashboard: React.FC = () => {
   const [selectedVideo, setSelectedVideo] = useState<Movie | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
-  // Cargar los videos cuando cambia el límite
+  /**
+   * Fetches popular movies from the API when the limit changes.
+   * 
+   * Handles initial loading and pagination. Updates the videos state
+   * and determines if more content is available based on response length.
+   * 
+   * @effect
+   * @listens limit - Triggers fetch when limit value changes
+   */
   useEffect(() => {
     let mounted = true;
 
@@ -50,7 +73,7 @@ export const Dashboard: React.FC = () => {
         const response = await apiClient.get<Movie[]>(`/api/v1/movies/popular/${limit}`);
         if (!mounted) return;
         setVideos(response || []);
-        // Si la respuesta tiene menos items que el límite solicitado, no hay más
+        // If response has fewer items than requested limit, no more content available
         setHasMore(!(response && response.length < limit));
         setError(null);
       } catch (err: any) {
@@ -70,6 +93,14 @@ export const Dashboard: React.FC = () => {
     };
   }, [limit]);
 
+  /**
+   * Handles the "Load more" button click.
+   * 
+   * Increases the limit to fetch additional videos.
+   * Prevents multiple simultaneous load requests.
+   * 
+   * @returns {void}
+   */
   const handleLoadMore = () => {
     if (loadingMore) return;
     setLimit((prev) => prev + PAGE_STEP);

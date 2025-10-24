@@ -3,6 +3,18 @@ import { useParams, useNavigate } from 'react-router';
 import apiClient from '../services/apiClient';
 import '../styles/MoviePage.scss';
 
+/**
+ * Represents a movie/video object with metadata.
+ * 
+ * @interface Movie
+ * @property {string} _id - Unique database identifier
+ * @property {string} title - Title of the movie
+ * @property {string} imageUrl - URL of the movie poster/thumbnail
+ * @property {string} videoUrl - URL of the video file
+ * @property {string} [author] - Optional author or creator of the movie
+ * @property {number} [duration] - Optional duration of the movie in seconds
+ * @property {string} [description] - Optional description of the movie
+ */
 type Movie = {
   _id: string;
   title: string;
@@ -13,6 +25,16 @@ type Movie = {
   description?: string;
 };
 
+/**
+ * Represents a user comment on a movie.
+ * 
+ * @interface Comment
+ * @property {string} _id - Unique database identifier for the comment
+ * @property {string} userId - ID of the user who created the comment
+ * @property {string} [userName] - Optional display name of the commenter
+ * @property {string} text - Content of the comment
+ * @property {string} createdAt - ISO timestamp of when the comment was created
+ */
 type Comment = {
   _id: string;
   userId: string;
@@ -21,6 +43,25 @@ type Comment = {
   createdAt: string;
 };
 
+/**
+ * MoviePage Component
+ * 
+ * Displays detailed information about a specific movie including:
+ * - Movie poster, title, author, duration, and description
+ * - Star rating system (1-5 stars) with average rating display
+ * - Comments section where users can read and add comments
+ * - Navigation controls to return to previous page
+ * 
+ * Features:
+ * - Fetches movie details, comments, and ratings on mount
+ * - Interactive star rating with hover effects
+ * - Real-time comment submission
+ * - Optimistic UI updates for ratings
+ * - Loading and error states
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered movie details page
+ */
 const MoviePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -33,13 +74,24 @@ const MoviePage: React.FC = () => {
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // rating state
+  // Rating state
   const [avgRating, setAvgRating] = useState<number | null>(null);
   const [ratingsCount, setRatingsCount] = useState<number>(0);
   const [userRating, setUserRating] = useState<number | null>(null);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
 
+  /**
+   * Fetches movie details, comments, and rating information on component mount.
+   * 
+   * Makes three parallel API calls:
+   * 1. Fetches movie metadata
+   * 2. Fetches movie comments
+   * 3. Fetches rating statistics (average, count, user's rating)
+   * 
+   * @effect
+   * @listens id - Triggers refetch when movie ID changes
+   */
   useEffect(() => {
     if (!id) return;
     let mounted = true;
@@ -94,6 +146,17 @@ const MoviePage: React.FC = () => {
     };
   }, [id]);
 
+  /**
+   * Handles the submission of a new comment.
+   * 
+   * Validates comment text, retrieves user info from localStorage,
+   * posts the comment to the API, and updates the comments list
+   * with the newly created comment.
+   * 
+   * @async
+   * @param {React.FormEvent} e - The form submission event
+   * @returns {Promise<void>}
+   */
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !id) return;
@@ -112,13 +175,23 @@ const MoviePage: React.FC = () => {
     }
   };
 
-  // submit rating (1-5)
+  /**
+   * Submits a user rating (1-5 stars) for the movie.
+   * 
+   * Validates user authentication, posts the rating to the API,
+   * and updates the local state with the new average rating,
+   * rating count, and user's rating. Uses optimistic UI updates.
+   * 
+   * @async
+   * @param {number} value - The rating value (1-5 stars)
+   * @returns {Promise<void>}
+   */
   const submitRating = async (value: number) => {
     if (!id) return;
     const userString = localStorage.getItem('user');
     const user = userString ? JSON.parse(userString) : null;
     if (!user?.id) {
-      // optionally redirect to login
+      // Optionally redirect to login
       window.alert('Debes iniciar sesión para calificar.');
       return;
     }
@@ -129,7 +202,7 @@ const MoviePage: React.FC = () => {
         `/api/v1/movies/${id}/rating`,
         { userId: user.id, rating: value }
       );
-      // update local state from response (optimistic)
+      // Update local state from response (optimistic)
       setAvgRating(res.average ?? null);
       setRatingsCount(res.count ?? ratingsCount);
       setUserRating(typeof res.userRating === 'number' ? res.userRating : value);
@@ -140,6 +213,7 @@ const MoviePage: React.FC = () => {
     }
   };
 
+  // Loading state
   if (loading) {
     return (
       <main className="movie-page">
@@ -151,6 +225,7 @@ const MoviePage: React.FC = () => {
     );
   }
 
+  // Error state
   if (error || !movie) {
     return (
       <main className="movie-page">

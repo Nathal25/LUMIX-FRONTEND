@@ -3,6 +3,23 @@ import '../styles/DeleteAccountPage.scss';
 import authService from '../services/authService';
 import { useNavigate } from 'react-router';
 
+/**
+ * DeleteAccountPage Component
+ * 
+ * Provides a secure interface for users to permanently delete their account.
+ * Requires both password verification and explicit confirmation text ("ELIMINAR")
+ * to prevent accidental deletions. This action is irreversible.
+ * 
+ * Features:
+ * - Double confirmation (password + confirmation text)
+ * - Form validation
+ * - Loading states
+ * - Success state with redirect to login
+ * - Global auth state update
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered delete account page with confirmation form or success message
+ */
 export const DeleteAccountPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmText, setConfirmText] = useState('');
@@ -11,6 +28,16 @@ export const DeleteAccountPage: React.FC = () => {
   const [done, setDone] = useState(false);
   const navigate = useNavigate();
 
+  /**
+   * Validates the account deletion form inputs.
+   * 
+   * Checks that:
+   * - Password is provided
+   * - Confirmation text is provided
+   * - Confirmation text exactly matches "ELIMINAR" (case-insensitive)
+   * 
+   * @returns {string[]} Array of validation error messages. Empty if validation passes.
+   */
   const validate = (): string[] => {
     const e: string[] = [];
     if (!password) e.push('La contraseña es requerida.');
@@ -20,6 +47,17 @@ export const DeleteAccountPage: React.FC = () => {
     return e;
   };
 
+  /**
+   * Handles the account deletion form submission.
+   * 
+   * Validates inputs, calls the authentication service to delete the user account,
+   * logs out the user, updates global auth state, displays success message,
+   * and redirects to the login page.
+   * 
+   * @async
+   * @param {React.FormEvent} ev - The form submission event
+   * @returns {Promise<void>}
+   */
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
     setErrors([]);
@@ -44,6 +82,7 @@ export const DeleteAccountPage: React.FC = () => {
     }
   };
 
+  // Success state: show confirmation message
   if (done) {
     return (
       <div className="delete-page">

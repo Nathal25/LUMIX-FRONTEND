@@ -142,21 +142,43 @@
 /* nuevo: botón eliminar (color pink) */
 .btn-delete {
   background: vars.$pink;
-  color: #111; /* contraste sobre pink */
+  color: #111; 
   font-weight: 800;
   padding: 0.7rem 1rem;
   border-radius: 10px;
   border: none;
   cursor: pointer;
   box-shadow: 0 10px 26px color.change(vars.$pink, $alpha: 0.14);
-  transition: transform 140ms ease, box-shadow 140ms ease, filter 120ms ease;
+  transition: transform 140ms ease, box-shadow 140ms ease, filter 120ms ease, background 140ms ease;
 }
 
 .btn-delete:hover,
 .btn-delete:focus {
+  background: #ff0000; // Cambia a rojo
   transform: translateY(-3px);
   filter: brightness(0.92);
-  box-shadow: 0 16px 34px color.change(vars.$pink, $alpha: 0.22);
+  box-shadow: 0 16px 34px color.change(#ff0000, $alpha: 0.22);
+  outline: none;
+}
+
+.btn-changePassword {
+  background: #4a90e2; 
+  color: #fff; 
+  font-weight: 800;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 26px color.change(#4a90e2, $alpha: 0.14);
+  transition: transform 140ms ease, box-shadow 140ms ease, filter 120ms ease, background 140ms ease;
+}
+
+.btn-changePassword:hover,
+.btn-changePassword:focus {
+  background: #357abd; // Azul más oscuro
+  transform: translateY(-3px);
+  filter: brightness(0.92);
+  box-shadow: 0 16px 34px color.change(#357abd, $alpha: 0.22);
   outline: none;
 }
 
@@ -168,7 +190,8 @@
   .profile-actions {
     flex-direction: column;
   }
-  .btn-delete {
+  .btn-delete,
+  .btn-changePassword {
     width: 100%;
   }
 }
