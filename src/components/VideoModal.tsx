@@ -18,6 +18,7 @@ interface VideoModalProps {
   title: string;
   movieId: string;
   onClose: () => void;
+  onFavoriteChange?: (movieId: string, isFavorite: boolean, favoriteId?: string) => void; // NEW optional callback
 }
 
 /**
@@ -84,7 +85,7 @@ const formatTime = (s: number) => {
  * @param {VideoModalProps} props - Component properties
  * @returns {JSX.Element} The rendered video modal with controls
  */
-const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClose }) => {
+const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClose, onFavoriteChange }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const progressRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -404,11 +405,15 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
       if (isFavorite && favoriteId) {
         await apiClient.delete(`/api/v1/favorites/movie/${favoriteId}`);
         setIsFavorite(false);
+        // notify parent that favorite was removed
+        if (typeof onFavoriteChange === 'function') onFavoriteChange(movieId, false, favoriteId);
         setFavoriteId(null);
       } else {
         const response = await apiClient.post<Favorite>('/api/v1/favorites', { userId, movieId });
         setIsFavorite(true);
         setFavoriteId(response._id);
+        // notify parent that favorite was added
+        if (typeof onFavoriteChange === 'function') onFavoriteChange(movieId, true, response._id);
       }
     } catch (error) {
       console.error('Error al actualizar favorito:', error);

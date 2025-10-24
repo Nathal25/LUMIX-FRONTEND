@@ -266,7 +266,7 @@ export const ProfilePage: React.FC = () => {
               onClick={handleReset}
               disabled={loading}
             >
-              Restaurar
+              Cancelar
             </button>
           </div>
 
