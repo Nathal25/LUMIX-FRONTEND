@@ -196,6 +196,43 @@ class AuthService {
       throw new Error(apiError.message || 'Error al restablecer la contraseña');
     }
   }
+
+  /**
+ * Cambia la contraseña del usuario autenticado.
+ * 
+ * Requiere la contraseña actual para verificación y la nueva contraseña con su confirmación.
+ * Esta operación requiere un token JWT válido (manejado automáticamente por cookies httpOnly).
+ * 
+ * @async
+ * @param {string} currentPassword - Contraseña actual del usuario para verificación.
+ * @param {string} newPassword - Nueva contraseña que se desea establecer.
+ * @param {string} confirmPassword - Confirmación de la nueva contraseña (debe coincidir con newPassword).
+ * @returns {Promise<{ message: string }>} Mensaje de éxito del servidor.
+ * @throws {Error} Si la contraseña actual es incorrecta, las contraseñas no coinciden, 
+ * no cumplen con los requisitos de seguridad, o el usuario no está autenticado.
+ */
+  async changePassword(
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string
+  ): Promise<{ message: string }> {
+    try {
+      const response = await apiClient.patch<{ message: string }>(
+        '/api/v1/users/change-password',
+        {
+          currentPassword,
+          password: newPassword,
+          confirmPassword
+        }
+      );
+      return response;
+    } catch (error) {
+      const apiError = error as ApiError;
+      throw new Error(apiError.message || 'Error al cambiar la contraseña');
+    }
+  }
+
+
 }
 
 const authService = new AuthService();

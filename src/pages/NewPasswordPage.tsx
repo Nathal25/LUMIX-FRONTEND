@@ -1,8 +1,26 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router'; // asegúrate de importar useLocation
+import { Link, useLocation } from 'react-router'; 
 import authService from '../services/authService';
 import '../styles/NewPasswordPage.scss';
 
+/**
+ * NewPasswordPage Component
+ * 
+ * Provides an interface for users to create a new password after requesting
+ * a password reset. This page is accessed via a unique token and email 
+ * combination sent to the user's email address.
+ * 
+ * Features:
+ * - Token and email validation from URL query parameters
+ * - Password confirmation matching
+ * - Password visibility toggle
+ * - Form validation with error display
+ * - Success state with redirect to login
+ * - Loading states during submission
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered new password page with form or success message
+ */
 export const NewPasswordPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -11,12 +29,21 @@ export const NewPasswordPage: React.FC = () => {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Aquí leemos los parámetros token y email
   const { search } = useLocation();
   const query = new URLSearchParams(search);
   const token = query.get('token');
   const email = query.get('email');
 
+  /**
+   * Validates the new password form inputs.
+   * 
+   * Checks that:
+   * - Password is provided
+   * - Password meets minimum length requirement (6 characters)
+   * - Password and confirmation match
+   * 
+   * @returns {string[]} Array of validation error messages. Empty if validation passes.
+   */
   const validate = () => {
     const errs: string[] = [];
     if (!password) errs.push('La contraseña es requerida.');
@@ -25,6 +52,17 @@ export const NewPasswordPage: React.FC = () => {
     return errs;
   };
 
+  /**
+   * Handles the new password form submission.
+   * 
+   * Validates inputs, calls the authentication service to reset the password
+   * using the token and email from URL parameters, displays success message,
+   * and clears the form fields.
+   * 
+   * @async
+   * @param {React.FormEvent} e - The form submission event
+   * @returns {Promise<void>}
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();

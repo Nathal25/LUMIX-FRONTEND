@@ -179,6 +179,11 @@ export const ProfilePage: React.FC = () => {
     navigate("/delete-account");
   };
 
+  const handleChangePassword = (): void => {
+    navigate("/changePassword");
+  };
+
+
   if (isLoadingUser || !user) {
     return (
       <div className="profile-page">
@@ -265,16 +270,23 @@ export const ProfilePage: React.FC = () => {
             </button>
           </div>
 
-          <div>
-            <button
-              type="button"
-              className="btn-delete"
-              onClick={handleDelete}
-              title="Eliminar cuenta"
-            >
-              Eliminar cuenta
-            </button>
-          </div>
+          <button
+            type="button"
+            className="btn-changePassword"
+            onClick={handleChangePassword}
+            title="Cambiar contraseña"
+          >
+            Cambiar contraseña
+          </button>
+
+          <button
+            type="button"
+            className="btn-delete"
+            onClick={handleDelete}
+            title="Eliminar cuenta"
+          >
+            Eliminar cuenta
+          </button>
         </form>
       </div>
     </div>
