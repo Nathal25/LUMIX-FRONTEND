@@ -260,14 +260,7 @@ export const ProfilePage: React.FC = () => {
             <button type="submit" className="btn-save" disabled={loading}>
               {loading ? "Guardando..." : "Guardar"}
             </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={handleReset}
-              disabled={loading}
-            >
-              Restaurar
-            </button>
+            
           </div>
 
           <button
