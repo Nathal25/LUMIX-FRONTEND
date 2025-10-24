@@ -81,15 +81,12 @@ export const FavoritesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Movie | null>(null);
-
-  // NEW: track if the modal removed the favorite for the current video
   const [removedDuringModal, setRemovedDuringModal] = useState<string | null>(null);
 
   useEffect(() => {
     getFavoritesVideos();
   }, []);
 
-  // NEW: handler passed to VideoModal so it can notify changes
   const handleFavoriteChange = (movieId: string, isFavorite: boolean, _favoriteId?: string) => {
     if (!isFavorite) {
       // mark to remove on modal close (do not remove immediately while modal open)
@@ -97,7 +94,6 @@ export const FavoritesPage: React.FC = () => {
     } else {
       // if user added favorite inside modal, clear any pending removal
       setRemovedDuringModal((prev) => (prev === movieId ? null : prev));
-      // optionally update videos list if needed (not required here)
     }
   };
 
