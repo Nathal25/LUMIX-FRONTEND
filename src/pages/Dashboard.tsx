@@ -123,10 +123,18 @@ export const Dashboard: React.FC = () => {
           <section className="videos-grid">
             {videos.length > 0 ? (
               videos.map((video) => (
-                <div key={video.pexelsId || video._id} className="video-item" onClick={() => setSelectedVideo(video)}>
+                // Use a semantic button so items are keyboard-focusable and activatable
+                <button
+                  key={video.pexelsId || video._id}
+                  type="button"
+                  className="video-item"
+                  onClick={() => setSelectedVideo(video)}
+                  aria-label={`Abrir reproductor para ${video.title}`}
+                  title={`Abrir: ${video.title}`}
+                >
                   <img className="video-thumbnail" src={video.imageUrl} alt={video.title} />
                   <h3 className="video-name">{video.title}</h3>
-                </div>
+                </button>
               ))
             ) : (
               <p className="no-videos">No hay videos disponibles.</p>

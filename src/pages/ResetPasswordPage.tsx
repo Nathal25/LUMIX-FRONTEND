@@ -9,7 +9,7 @@ export const ResetPasswordPage: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  /** Hook de navegación para redirigir al dashboard tras el login */
+  /** Navigation hook to redirect to dashboard after login */
     const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {

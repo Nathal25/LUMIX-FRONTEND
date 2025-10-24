@@ -2,7 +2,7 @@
 import apiClient, { ApiError } from './apiClient';
 
 /**
- * Credenciales necesarias para iniciar sesión.
+ * Necessary credentials to log in.
  * @interface
  */
 interface LoginCredentials {
@@ -11,7 +11,7 @@ interface LoginCredentials {
 }
 
 /**
- * Respuesta esperada al iniciar sesión.
+ * Expected response when logging in.
  * @interface
  */
 interface LoginResponse {
@@ -21,7 +21,7 @@ interface LoginResponse {
 }
 
 /**
- * Representa un usuario autenticado en el sistema.
+ * Represents a user in the system.
  * @interface
  */
 interface User {
@@ -35,17 +35,17 @@ interface User {
 }
 
 /**
- * Servicio de autenticación encargado de manejar el inicio, cierre y verificación de sesión de usuario.
- * Proporciona métodos para comunicarse con el backend mediante `apiClient`.
+ * Authentication service responsible for handling user login, logout, and session verification.
+ * Provides methods to communicate with the backend using `apiClient`.
  * @class
  */
 class AuthService {
   /**
-   * Inicia sesión de usuario con las credenciales proporcionadas.
+   * User login with email and password.
    * @async
-   * @param {LoginCredentials} credentials - Objeto con el correo y la contraseña del usuario.
-   * @returns {Promise<LoginResponse>} Respuesta con información básica del usuario autenticado.
-   * @throws {Error} Si ocurre un error en el proceso de autenticación.
+   * @param {LoginCredentials} credentials - Object with the user's email and password.
+   * @returns {Promise<LoginResponse>} Response with basic information of the authenticated user.
+   * @throws {Error} If an error occurs during the authentication process.
    */
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
@@ -53,11 +53,11 @@ class AuthService {
         '/api/v1/users/login',
         credentials,
       );
-      // Notificar al resto de la app que cambió el estado de auth
+      // Notify the rest of the app that the auth state has changed
       try {
         window.dispatchEvent(new Event('authChanged'));
       } catch (e) {
-        /* no bloquear en entornos no DOM */
+        /* don't block in non-DOM environments */
       }
 
       return response;
@@ -68,9 +68,9 @@ class AuthService {
   }
 
   /**
-   * Cierra la sesión del usuario actual.
+   * Logs out the current user.
    * @async
-   * @returns {Promise<void>} No retorna valor.
+   * @returns {Promise<void>} No return value.
    */
   async logout(): Promise<void> {
     try {
@@ -82,10 +82,10 @@ class AuthService {
   }
 
   /**
-   * Verifica si el usuario actual está autenticado.
+   * Verifies if the current user is authenticated.
    * @async
-   * @returns {Promise<User | null>} El objeto `User` si el usuario está autenticado, o `null` si no lo está.
-   * @throws {ApiError} Si ocurre un error distinto de autenticación (401).
+   * @returns {Promise<User | null>} The `User` object if the user is authenticated, or `null` if not.
+   * @throws {ApiError} If an error occurs other than authentication (401).
    */
   async checkAuth(): Promise<User | null> {
     try {
@@ -101,17 +101,17 @@ class AuthService {
   }
 
   /**
-   * Registra un nuevo usuario en el sistema.
+   * Registers a new user in the system.
    * @async
-   * @param {Object} userData - Datos del nuevo usuario.
-   * @param {string} userData.firstName - Nombre del usuario.
-   * @param {string} userData.lastName - Apellido del usuario.
-   * @param {number} userData.age - Edad del usuario.
-   * @param {string} userData.email - Correo electrónico del usuario.
-   * @param {string} userData.password - Contraseña del usuario.
-   * @param {string} userData.confirmPassword - Confirmación de la contraseña.
-   * @returns {Promise<{ id: string }>} Objeto con el ID del nuevo usuario registrado.
-   * @throws {Error} Si ocurre un error al registrar el usuario.
+   * @param {Object} userData - Data of the new user.
+   * @param {string} userData.firstName - First name of the user.
+   * @param {string} userData.lastName - Last name of the user.
+   * @param {number} userData.age - Age of the user.
+   * @param {string} userData.email - Email of the user.
+   * @param {string} userData.password - Password of the user.
+   * @param {string} userData.confirmPassword - Password confirmation.
+   * @returns {Promise<{ id: string }>} Object with the ID of the newly registered user.
+   * @throws {Error} If an error occurs while registering the user.
    */
   async register(userData: {
     firstName: string;
@@ -147,16 +147,16 @@ class AuthService {
   }
 
   /**
-   * Actualiza la información del usuario autenticado.
-   * 
-   * Permite modificar los campos: `firstName`, `lastName`, `age` y `email`.
-   * Esta operación requiere un token JWT válido (manejado automáticamente por cookies httpOnly).
-   * 
+   * Updates the information of the authenticated user.
+   *
+   * Allows modifying the fields: `firstName`, `lastName`, `age`, and `email`.
+   * This operation requires a valid JWT token (automatically handled by httpOnly cookies).
+   *
    * @async
-   * @param {Partial<User>} updates - Objeto con los campos a actualizar. 
-   * Solo los campos definidos serán enviados al backend.
-   * @returns {Promise<{ message: string }>} Mensaje de éxito del servidor.
-   * @throws {Error} Si ocurre un error durante la actualización o el usuario no está autenticado.
+   * @param {Partial<User>} updates - Object with the fields to update.
+   * Only the defined fields will be sent to the backend.
+   * @returns {Promise<{ message: string }>} Success message from the server.
+   * @throws {Error} If an error occurs during the update or the user is not authenticated.
    */
   async updateUser(updates: Partial<User>): Promise<{ message: string }> {
     try {
@@ -198,18 +198,18 @@ class AuthService {
   }
 
   /**
- * Cambia la contraseña del usuario autenticado.
- * 
- * Requiere la contraseña actual para verificación y la nueva contraseña con su confirmación.
- * Esta operación requiere un token JWT válido (manejado automáticamente por cookies httpOnly).
- * 
+ * Changes the password of the authenticated user.
+ *
+ * Requires the current password for verification and the new password with its confirmation.
+ * This operation requires a valid JWT token (automatically handled by httpOnly cookies).
+ *
  * @async
- * @param {string} currentPassword - Contraseña actual del usuario para verificación.
- * @param {string} newPassword - Nueva contraseña que se desea establecer.
- * @param {string} confirmPassword - Confirmación de la nueva contraseña (debe coincidir con newPassword).
- * @returns {Promise<{ message: string }>} Mensaje de éxito del servidor.
- * @throws {Error} Si la contraseña actual es incorrecta, las contraseñas no coinciden, 
- * no cumplen con los requisitos de seguridad, o el usuario no está autenticado.
+ * @param {string} currentPassword - Current password of the user for verification.
+ * @param {string} newPassword - New password to be set.
+ * @param {string} confirmPassword - Confirmation of the new password (must match newPassword).
+ * @returns {Promise<{ message: string }>} Success message from the server.
+ * @throws {Error} If the current password is incorrect, the passwords do not match,
+ * do not meet security requirements, or the user is not authenticated.
  */
   async changePassword(
     currentPassword: string,

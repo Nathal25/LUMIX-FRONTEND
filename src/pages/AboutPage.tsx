@@ -1,6 +1,22 @@
 import React from 'react';
 import '../styles/AboutPage.scss';
 
+/**
+ * AboutPage Component
+ * 
+ * Displays information about the Lumix platform and its development team.
+ * Includes a hero section with the platform description and a team member
+ * showcase with roles and brief bios.
+ * 
+ * Features:
+ * - Hero section with platform mission statement
+ * - Team members showcase with avatars, names, roles, and bios
+ * - Accessible team list with ARIA labels
+ * - Responsive card layout for team members
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered about page with team information
+ */
 export const AboutPage: React.FC = () => {
   return (
     <main className="about-page">
