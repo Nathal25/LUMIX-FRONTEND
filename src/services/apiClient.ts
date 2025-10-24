@@ -1,23 +1,23 @@
 // src/services/apiClient.ts
 
 /**
- * Representa un error de API con mensaje y código de estado HTTP.
+ * Represents an API error with message and HTTP status code.
  */
 interface ApiError {
-  /** Mensaje descriptivo del error. */
+  /** Descriptive error message. */
   message: string;
-  /** Código de estado HTTP (0 si es error de red). */
+  /** HTTP status code (0 if network error). */
   status: number;
 }
 
 /**
- * Cliente HTTP genérico para interactuar con el backend.
+ * Generic HTTP client for interacting with the backend.
  *
- * Encapsula las peticiones `fetch` con configuración predeterminada:
- * - Base URL configurable.
- * - Inclusión automática de cookies (`credentials: 'include'`).
- * - Manejo centralizado de errores.
- * - Métodos genéricos (`get`, `post`, `put`, `delete`, `patch`).
+ * Encapsulates `fetch` requests with default configuration:
+ * - Configurable base URL.
+ * - Automatic inclusion of cookies (`credentials: 'include'`).
+ * - Centralized error handling.
+ * - Generic methods (`get`, `post`, `put`, `delete`, `patch`).
  *
  * @example
  * ```ts
@@ -29,26 +29,26 @@ class ApiClient {
   private baseURL: string;
 
   /**
-   * Crea una nueva instancia del cliente API.
-   * @param baseURL - URL base del backend (por ejemplo: "https://api.miapp.com")
+   * Creates a new instance of the API client.
+   * @param baseURL - Base URL of the backend (e.g., "https://api.myapp.com")
    */
   constructor(baseURL: string) {
     this.baseURL = baseURL;
   }
 
   /**
-   * Realiza una petición HTTP genérica usando `fetch`.
+   * Makes a generic HTTP request using `fetch`.
    *
-   * Se encarga de:
-   * - Construir la URL completa.
-   * - Incluir cookies (para autenticación por `httpOnly`).
-   * - Manejar errores de red o respuestas no exitosas.
+   * Handles:
+   * - Building the full URL.
+   * - Including cookies (for `httpOnly` authentication).
+   * - Handling network errors or unsuccessful responses.
    *
-   * @template T Tipo esperado de la respuesta.
-   * @param endpoint - Ruta del recurso (por ejemplo, "/users").
-   * @param config - Configuración opcional del `RequestInit`.
-   * @returns Promesa que resuelve con los datos de tipo `T`.
-   * @throws {ApiError} Si ocurre un error HTTP o de red.
+   * @template T Expected response type.
+   * @param endpoint - Resource path (e.g., "/users").
+   * @param config - Optional `RequestInit` configuration.
+   * @returns Promise that resolves with data of type `T`.
+   * @throws {ApiError} If an HTTP or network error occurs.
    */
   private async request<T>(endpoint: string, config: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
@@ -83,21 +83,21 @@ class ApiClient {
   }
 
   /**
-   * Envía una petición GET.
-   * @template T Tipo esperado de la respuesta.
-   * @param endpoint - Ruta del recurso.
-   * @returns Promesa con los datos de tipo `T`.
+   * Sends a GET request.
+   * @template T Expected response type.
+   * @param endpoint - Resource path.
+   * @returns Promise with data of type `T`.
    */
   async get<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: "GET" });
   }
 
   /**
-   * Envía una petición POST.
-   * @template T Tipo esperado de la respuesta.
-   * @param endpoint - Ruta del recurso.
-   * @param body - Cuerpo de la petición (opcional).
-   * @returns Promesa con los datos de tipo `T`.
+   * Sends a POST request.
+   * @template T Expected response type.
+   * @param endpoint - Resource path.
+   * @param body - Request body (optional).
+   * @returns Promise with data of type `T`.
    */
   async post<T>(endpoint: string, body?: any): Promise<T> {
     return this.request<T>(endpoint, {
@@ -107,11 +107,11 @@ class ApiClient {
   }
 
   /**
-   * Envía una petición PUT.
-   * @template T Tipo esperado de la respuesta.
-   * @param endpoint - Ruta del recurso.
-   * @param body - Cuerpo de la petición (opcional).
-   * @returns Promesa con los datos de tipo `T`.
+   * Sends a PUT request.
+   * @template T Expected response type.
+   * @param endpoint - Resource path.
+   * @param body - Request body (optional).
+   * @returns Promise with data of type `T`.
    */
   async put<T>(endpoint: string, body?: any): Promise<T> {
     return this.request<T>(endpoint, {
@@ -121,21 +121,21 @@ class ApiClient {
   }
 
   /**
-   * Envía una petición DELETE.
-   * @template T Tipo esperado de la respuesta.
-   * @param endpoint - Ruta del recurso.
-   * @returns Promesa con los datos de tipo `T`.
+   * Sends a DELETE request.
+   * @template T Expected response type.
+   * @param endpoint - Resource path.
+   * @returns Promise with data of type `T`.
    */
   async delete<T>(endpoint: string, body?: any): Promise<T> {
     return this.request<T>(endpoint, { method: "DELETE", body: JSON.stringify(body) });
   }
 
   /**
-   * Envía una petición PATCH.
-   * @template T Tipo esperado de la respuesta.
-   * @param endpoint - Ruta del recurso.
-   * @param body - Cuerpo de la petición (opcional).
-   * @returns Promesa con los datos de tipo `T`.
+   * Sends a PATCH request.
+   * @template T Expected response type.
+   * @param endpoint - Resource path.
+   * @param body - Request body (optional).
+   * @returns Promise with data of type `T`.
    */
   async patch<T>(endpoint: string, body?: any): Promise<T> {
     return this.request<T>(endpoint, {

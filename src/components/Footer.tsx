@@ -2,6 +2,24 @@ import React from 'react';
 import { Link } from 'react-router';
 import '../styles/Footer.scss';
 
+/**
+ * Footer Component
+ * 
+ * Site-wide footer with navigation sitemap, branding, and copyright information.
+ * Displays organized navigation links grouped by category (Pages, Account, Support)
+ * along with the Lumix logo and description.
+ * 
+ * Features:
+ * - Sitemap navigation organized by sections
+ * - Internal routing links
+ * - External contact link
+ * - Dynamic copyright year
+ * - Accessible navigation with ARIA labels
+ * - Responsive layout
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered footer with sitemap and branding
+ */
 export const Footer: React.FC = () => {
   const year = new Date().getFullYear();
   return (
@@ -32,7 +50,7 @@ export const Footer: React.FC = () => {
             <ul className="sitemap-list">
               <li><Link to="/reset-password">Restablecer contraseña</Link></li>
               <li><a href="mailto:soporte@lumix.app">Contacto</a></li>
-              {/* <li><a href="/terms">Términos</a></li> */}
+              {/* <li><a href="/terms">Terms</a></li> */}
             </ul>
           </div>
         </nav>

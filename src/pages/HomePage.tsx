@@ -1,5 +1,19 @@
 import "../styles/HomePage.scss";
 
+/**
+ * HomePage Component
+ * 
+ * Landing page that welcomes users to the Lumix platform.
+ * Displays a hero section with the main title, subtitle, and call-to-action button.
+ * 
+ * Features:
+ * - Hero section with visual appeal
+ * - Welcoming message
+ * - Call-to-action button
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered home page with hero section
+ */
 export function HomePage() {
   return (
     <div className="home-container">

@@ -2,8 +2,17 @@ import React, { useRef, useState, useEffect } from 'react';
 import '../styles/VideoModal.scss';
 import { FaPlay, FaPause, FaForward, FaBackward, FaExpand, FaClosedCaptioning, FaHeart } from 'react-icons/fa';
 import apiClient from '../services/apiClient';
-import { useNavigate } from 'react-router'; // added
+import { useNavigate } from 'react-router';
 
+/**
+ * Properties for the VideoModal component.
+ * 
+ * @interface VideoModalProps
+ * @property {string} videoUrl - URL of the video file to play
+ * @property {string} title - Title of the video/movie
+ * @property {string} movieId - Unique identifier of the movie in the database
+ * @property {() => void} onClose - Callback function to close the modal
+ */
 interface VideoModalProps {
   videoUrl: string;
   title: string;
@@ -11,6 +20,16 @@ interface VideoModalProps {
   onClose: () => void;
 }
 
+/**
+ * Represents a favorite movie entry in the database.
+ * 
+ * @interface Favorite
+ * @property {string} userId - ID of the user who favorited the movie
+ * @property {string} movieId - ID of the favorited movie
+ * @property {string} _id - Unique identifier for the favorite entry
+ * @property {string} createdAt - ISO timestamp when the favorite was created
+ * @property {string} updatedAt - ISO timestamp when the favorite was last updated
+ */
 interface Favorite {
   userId: string;
   movieId: string;
@@ -19,6 +38,15 @@ interface Favorite {
   updatedAt: string;
 }
 
+/**
+ * Formats a time value in seconds to MM:SS format.
+ * 
+ * @param {number} s - Time in seconds to format
+ * @returns {string} Formatted time string in MM:SS format (e.g., "3:45")
+ * @example
+ * formatTime(125) // returns "2:05"
+ * formatTime(65) // returns "1:05"
+ */
 const formatTime = (s: number) => {
   if (!isFinite(s)) return '0:00';
   const minutes = Math.floor(s / 60);
@@ -26,6 +54,36 @@ const formatTime = (s: number) => {
   return `${minutes}:${seconds}`;
 };
 
+/**
+ * VideoModal Component
+ * 
+ * A full-featured video player modal with custom controls, keyboard shortcuts,
+ * and favorite functionality. Displays a video in an overlay with play/pause,
+ * seek, fullscreen, captions, and favorite controls.
+ * 
+ * Features:
+ * - Custom video controls (play/pause, forward/backward, fullscreen)
+ * - Keyboard shortcuts (Space/K: play/pause, F: favorite, arrows: seek, etc.)
+ * - Progress bar with click-to-seek functionality
+ * - Favorite toggle with backend synchronization
+ * - Request Animation Frame (RAF) for smooth progress updates
+ * - Loading state with spinner
+ * - Captions support
+ * - Link to detailed movie page
+ * 
+ * Keyboard Shortcuts:
+ * - Space/K: Play/Pause
+ * - F: Toggle Favorite
+ * - ←/→: Seek backward/forward 10 seconds
+ * - J/L: Seek backward/forward 10 seconds (YouTube-style)
+ * - I: Go to movie details page
+ * - C: Toggle captions
+ * - Esc: Close modal
+ * 
+ * @component
+ * @param {VideoModalProps} props - Component properties
+ * @returns {JSX.Element} The rendered video modal with controls
+ */
 const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClose }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const progressRef = useRef<HTMLDivElement | null>(null);
@@ -39,6 +97,13 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
   const [duration, setDuration] = useState<number>(0);
   const [loadingPoster, setLoadingPoster] = useState(true);
 
+  /**
+   * Fetches the favorite status of the movie for the current user.
+   * Checks if the movie is in the user's favorites list and updates state accordingly.
+   * 
+   * @effect
+   * @listens movieId - Runs when the movie ID changes
+   */
   useEffect(() => {
     const fetchFavoriteStatus = async () => {
       const userString = localStorage.getItem('user');
@@ -64,21 +129,109 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     fetchFavoriteStatus();
   }, [movieId]);
 
-  // keyboard controls
+  /**
+   * Sets up keyboard shortcuts for video control.
+   * Handles various keyboard inputs for play/pause, seek, favorite, captions, and navigation.
+   * Prevents interference with input fields and text areas.
+   * 
+   * Keyboard mappings:
+   * - Escape: Close modal
+   * - Space/K: Play/Pause
+   * - F: Toggle favorite
+   * - Arrow Left/J: Seek backward 10 seconds
+   * - Arrow Right/L: Seek forward 10 seconds
+   * - I: Go to details page
+   * - C: Toggle captions
+   * 
+   * @effect
+   * @listens isPlaying - Re-registers handlers when play state changes
+   * @listens isFavorite - Re-registers handlers when favorite state changes
+   */
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-      if (e.key === ' ' && document.activeElement !== (document.querySelector('.custom-controls button') as HTMLElement)) {
-        e.preventDefault();
-        togglePlay();
+      // Don't interfere with typing in input fields
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      switch (e.key) {
+        case 'Escape':
+          onClose();
+          break;
+        
+        case ' ':
+          // Space to play/pause - prevent default scrolling
+          e.preventDefault();
+          togglePlay();
+          break;
+        
+        case 'k':
+        case 'K':
+          // K to play/pause (YouTube-style)
+          e.preventDefault();
+          togglePlay();
+          break;
+        
+        case 'f':
+        case 'F':
+          // F to toggle favorite
+          e.preventDefault();
+          toggleFavorite();
+          break;
+        
+        case 'ArrowRight':
+          // Right arrow: forward 10 seconds
+          e.preventDefault();
+          handleForward();
+          break;
+        
+        case 'ArrowLeft':
+          // Left arrow: backward 10 seconds
+          e.preventDefault();
+          handleBackward();
+          break;
+        
+        case 'i':
+        case 'I':
+          // I to go to details page
+          e.preventDefault();
+          goToDetails();
+          break;
+        
+        case 'c':
+        case 'C':
+          // C to toggle captions
+          e.preventDefault();
+          toggleCaptions();
+          break;
+        
+        case 'l':
+        case 'L':
+          // L to forward 10 seconds (YouTube-style)
+          e.preventDefault();
+          handleForward();
+          break;
+        
+        case 'j':
+        case 'J':
+          // J to backward 10 seconds (YouTube-style)
+          e.preventDefault();
+          handleBackward();
+          break;
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying]);
+  }, [isPlaying, isFavorite]);
 
-  // set up loaded / timeupdate handlers
+  /**
+   * Sets up video event listeners for metadata loading, time updates, and video end.
+   * Handles initial video setup, duration detection, and loading state management.
+   * Includes a fallback timeout to hide the loading poster after 8 seconds.
+   * 
+   * @effect
+   * @listens video element events - loadedmetadata, timeupdate, ended
+   */
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -114,7 +267,16 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // RAF loop for smooth progress updates while playing
+  /**
+   * Implements a Request Animation Frame (RAF) loop for smooth progress bar updates.
+   * Updates the current time state at ~60fps while the video is playing,
+   * providing smooth visual feedback in the progress bar.
+   * Automatically starts/stops based on play state.
+   * 
+   * @effect
+   * @listens isPlaying - Starts/stops RAF loop based on play state
+   * @listens duration - Reacts to duration changes
+   */
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -147,6 +309,12 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     // depend on isPlaying and videoRef.current
   }, [isPlaying, duration]);
 
+  /**
+   * Toggles video playback between play and pause states.
+   * Updates the isPlaying state and calls the appropriate video element method.
+   * 
+   * @returns {void}
+   */
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
@@ -159,14 +327,33 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     }
   };
 
+  /**
+   * Seeks the video forward by 10 seconds.
+   * Ensures the new time does not exceed the video duration.
+   * 
+   * @returns {void}
+   */
   const handleForward = () => {
     if (videoRef.current) videoRef.current.currentTime = Math.min((videoRef.current.currentTime || 0) + 10, duration);
   };
 
+  /**
+   * Seeks the video backward by 10 seconds.
+   * Ensures the new time does not go below 0.
+   * 
+   * @returns {void}
+   */
   const handleBackward = () => {
     if (videoRef.current) videoRef.current.currentTime = Math.max((videoRef.current.currentTime || 0) - 10, 0);
   };
 
+  /**
+   * Toggles fullscreen mode for the video element.
+   * Enters fullscreen if not already in fullscreen, otherwise exits fullscreen.
+   * 
+   * @async
+   * @returns {Promise<void>}
+   */
   const handleFullscreen = async () => {
     const video = videoRef.current;
     if (!video) return;
@@ -181,6 +368,12 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     }
   };
 
+  /**
+   * Toggles the visibility of video captions/subtitles.
+   * Switches the first text track between 'showing' and 'hidden' modes.
+   * 
+   * @returns {void}
+   */
   const toggleCaptions = () => {
     const video = videoRef.current;
     if (video && video.textTracks.length > 0) {
@@ -189,6 +382,15 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     }
   };
 
+  /**
+   * Toggles the favorite status of the current movie.
+   * Adds or removes the movie from the user's favorites list via API.
+   * Updates local state to reflect the change.
+   * 
+   * @async
+   * @returns {Promise<void>}
+   * @throws {Error} When API request fails
+   */
   const toggleFavorite = async () => {
     const userString = localStorage.getItem('user');
     const userId = userString ? JSON.parse(userString).id : null;
@@ -213,15 +415,37 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     }
   };
 
+  /**
+   * Handles clicks on the modal overlay (outside the content area).
+   * Closes the modal when the overlay is clicked.
+   * 
+   * @param {React.MouseEvent} e - The mouse click event
+   * @returns {void}
+   */
   const handleOverlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onClose();
   };
 
+  /**
+   * Handles clicks on the modal content area.
+   * Prevents event propagation to avoid closing the modal.
+   * 
+   * @param {React.MouseEvent} e - The mouse click event
+   * @returns {void}
+   */
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
 
+  /**
+   * Handles clicks on the progress bar to seek to a specific time.
+   * Calculates the clicked position as a percentage of the total duration
+   * and updates the video's current time accordingly.
+   * 
+   * @param {React.MouseEvent<HTMLDivElement>} e - The mouse click event on the progress bar
+   * @returns {void}
+   */
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const pr = progressRef.current;
     const video = videoRef.current;
@@ -233,7 +457,12 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
     setCurrent(pct * duration); // immediate UI update
   };
 
-  // navigate to a dedicated movie page (close modal first)
+  /**
+   * Navigates to the detailed movie page.
+   * Closes the modal before navigation to ensure clean transition.
+   * 
+   * @returns {void}
+   */
   const goToDetails = () => {
     try {
       onClose();
@@ -315,7 +544,9 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
             Ver ficha completa
             </button>
         </div>
-          <p className="video-actions-hint">Presiona espacio para reproducir/pausar — Esc para cerrar</p>
+          <p className="video-actions-hint">
+            <strong>Atajos de teclado:</strong> Espacio/K: Reproducir/Pausar · F: Favorito · ←/→: Retroceder/Adelantar · I: Ver ficha · C: Subtítulos · Esc: Cerrar
+          </p>
         </div>
 
         

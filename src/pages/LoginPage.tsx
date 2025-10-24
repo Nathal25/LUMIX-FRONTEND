@@ -25,27 +25,27 @@ import "../styles/LoginPage.scss";
  * @returns {JSX.Element} El componente de la página de inicio de sesión.
  */
 export const LoginPage: React.FC = () => {
-  /** Estado del correo electrónico ingresado por el usuario */
+  /** State of the email entered by the user */
   const [email, setEmail] = useState("");
 
-  /** Estado de la contraseña ingresada por el usuario */
+  /** State of the password entered by the user */
   const [password, setPassword] = useState("");
 
-  /** Estado del mensaje de error mostrado en caso de fallo de autenticación */
+  /** State of the error message shown in case of authentication failure */
   const [error, setError] = useState("");
 
-  /** Estado que indica si la petición de login está en curso */
+  /** State indicating if the login request is in progress */
   const [loading, setLoading] = useState(false);
 
-  /** Hook de navegación para redirigir al dashboard tras el login */
+  /** Navigation hook to redirect to dashboard after login */
   const navigate = useNavigate();
 
   /**
-   * Maneja el envío del formulario de inicio de sesión.
+   * Manager for form submission.
    *
-   * Envía las credenciales al servicio de autenticación (`authService.login`),
-   * verifica si el usuario fue autenticado (`authService.checkAuth`) y redirige
-   * al panel principal. En caso de error, muestra un mensaje descriptivo.
+   * Sends the credentials to the authentication service (`authService.login`),
+   * checks if the user was authenticated (`authService.checkAuth`) and redirects
+   * to the main panel. In case of error, it shows a descriptive message.
    *
    * @param {FormEvent} e - Evento del formulario.
    * @returns {Promise<void>}

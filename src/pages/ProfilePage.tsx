@@ -8,13 +8,13 @@ import authService from "../services/authService";
  * @interface
  */
 type User = {
-  /** Nombre del usuario */
+  /** User's first name */
   firstName: string;
-  /** Apellido(s) del usuario */
+  /** User's last name(s) */
   lastName: string;
-  /** Edad del usuario */
+  /** User's age */
   age: number;
-  /** Dirección de correo electrónico del usuario */
+  /** User's email address */
   email: string;
 };
 
@@ -36,22 +36,22 @@ type User = {
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   
-  /** Estado que mantiene los datos originales del usuario para restauración */
+  /** State that maintains the original user data for restoration */
   const [original, setOriginal] = useState<User | null>(null);
   
   /** Estado con los datos actuales del usuario (editables) */
   const [user, setUser] = useState<User | null>(null);
   
-  /** Lista de errores de validación */
+  /** List of validation errors */
   const [errors, setErrors] = useState<string[]>([]);
   
-  /** Indica si la operación de guardado fue exitosa */
+  /** Indicates if the save operation was successful */
   const [success, setSuccess] = useState(false);
   
-  /** Indica si hay una operación de guardado en curso */
+  /** Indicates if there is a save operation in progress */
   const [loading, setLoading] = useState(false);
   
-  /** Indica si se está cargando la información del usuario desde localStorage */
+  /** Indicates if user information is being loaded from localStorage */
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   /**
