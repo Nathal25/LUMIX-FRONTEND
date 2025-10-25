@@ -162,23 +162,23 @@
 }
 
 .btn-changePassword {
-  background: #4a90e2; 
+  background: #b74ae2; 
   color: #fff; 
   font-weight: 800;
   padding: 0.7rem 1rem;
   border-radius: 10px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 10px 26px color.change(#4a90e2, $alpha: 0.14);
+  box-shadow: 0 10px 26px color.change(#d421cb, $alpha: 0.14);
   transition: transform 140ms ease, box-shadow 140ms ease, filter 120ms ease, background 140ms ease;
 }
 
 .btn-changePassword:hover,
 .btn-changePassword:focus {
-  background: #357abd; // Azul más oscuro
+  background: #b422a8; 
   transform: translateY(-3px);
   filter: brightness(0.92);
-  box-shadow: 0 16px 34px color.change(#357abd, $alpha: 0.22);
+  box-shadow: 0 16px 34px color.change(#c816ce, $alpha: 0.22);
   outline: none;
 }
 
