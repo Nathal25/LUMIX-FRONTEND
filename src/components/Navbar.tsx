@@ -290,7 +290,7 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
         {isAuthenticated && (
           <>
             <Link to="/dashboard" className="navbar-link" onClick={close}>
-              Dashboard
+              Películas
             </Link>
             <Link to="/profile" className="navbar-link" onClick={close}>
               Perfil
