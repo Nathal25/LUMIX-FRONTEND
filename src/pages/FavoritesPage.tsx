@@ -81,10 +81,30 @@ export const FavoritesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Movie | null>(null);
+  const [removedDuringModal, setRemovedDuringModal] = useState<string | null>(null);
 
   useEffect(() => {
     getFavoritesVideos();
   }, []);
+
+  const handleFavoriteChange = (movieId: string, isFavorite: boolean, _favoriteId?: string) => {
+    if (!isFavorite) {
+      // mark to remove on modal close (do not remove immediately while modal open)
+      setRemovedDuringModal(movieId);
+    } else {
+      // if user added favorite inside modal, clear any pending removal
+      setRemovedDuringModal((prev) => (prev === movieId ? null : prev));
+    }
+  };
+
+  // NEW: close modal and if a favorite was removed inside modal, remove it from UI
+  const handleModalClose = () => {
+    if (removedDuringModal) {
+      setVideos((prev) => prev.filter((v) => v._id !== removedDuringModal));
+      setRemovedDuringModal(null);
+    }
+    setSelectedVideo(null);
+  };
 
   async function getFavoritesVideos() {
     try {
@@ -216,7 +236,8 @@ export const FavoritesPage: React.FC = () => {
           videoUrl={selectedVideo.videoUrl}
           title={selectedVideo.title}
           movieId={selectedVideo._id}
-          onClose={() => setSelectedVideo(null)}
+          onClose={handleModalClose}              // use the wrapper close
+          onFavoriteChange={handleFavoriteChange} // pass callback
         />
       )}
     </main>
