@@ -1,20 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import apiClient from '../services/apiClient';
+import VideoModal from '../components/VideoModal';
 import '../styles/MoviePage.scss';
 
-/**
- * Represents a movie/video object with metadata.
- * 
- * @interface Movie
- * @property {string} _id - Unique database identifier
- * @property {string} title - Title of the movie
- * @property {string} imageUrl - URL of the movie poster/thumbnail
- * @property {string} videoUrl - URL of the video file
- * @property {string} [author] - Optional author or creator of the movie
- * @property {number} [duration] - Optional duration of the movie in seconds
- * @property {string} [description] - Optional description of the movie
- */
+
 type Movie = {
   _id: string;
   title: string;
@@ -25,73 +15,76 @@ type Movie = {
   description?: string;
 };
 
-/**
- * Represents a user comment on a movie.
- * 
- * @interface Comment
- * @property {string} _id - Unique database identifier for the comment
- * @property {string} userId - ID of the user who created the comment
- * @property {string} [userName] - Optional display name of the commenter
- * @property {string} text - Content of the comment
- * @property {string} createdAt - ISO timestamp of when the comment was created
- */
-type Comment = {
+type UserData = {
   _id: string;
-  userId: string;
-  userName?: string;
-  text: string;
-  createdAt: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
 };
 
-/**
- * MoviePage Component
- * 
- * Displays detailed information about a specific movie including:
- * - Movie poster, title, author, duration, and description
- * - Star rating system (1-5 stars) with average rating display
- * - Comments section where users can read and add comments
- * - Navigation controls to return to previous page
- * 
- * Features:
- * - Fetches movie details, comments, and ratings on mount
- * - Interactive star rating with hover effects
- * - Real-time comment submission
- * - Optimistic UI updates for ratings
- * - Loading and error states
- * 
- * @component
- * @returns {JSX.Element} The rendered movie details page
- */
+type Review = {
+  _id: string;
+  userId: string | UserData; 
+  userName?: string; 
+  movieId: string;   
+  comment: string;
+  rating: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 const MoviePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userCommented, setUserCommented] = useState(false);
 
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [newComment, setNewComment] = useState('');
+  const [newRating, setNewRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Rating state
-  const [avgRating, setAvgRating] = useState<number | null>(null);
-  const [ratingsCount, setRatingsCount] = useState<number>(0);
-  const [userRating, setUserRating] = useState<number | null>(null);
-  const [hoverRating, setHoverRating] = useState<number | null>(null);
-  const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editComment, setEditComment] = useState('');
+  const [editRating, setEditRating] = useState<number>(0);
+  const [editHoverRating, setEditHoverRating] = useState<number | null>(null);
+  const [updating, setUpdating] = useState(false);
 
-  /**
-   * Fetches movie details, comments, and rating information on component mount.
-   * 
-   * Makes three parallel API calls:
-   * 1. Fetches movie metadata
-   * 2. Fetches movie comments
-   * 3. Fetches rating statistics (average, count, user's rating)
-   * 
-   * @effect
-   * @listens id - Triggers refetch when movie ID changes
-   */
+  // Delete modal states
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const getCurrentUserId = (): string | null => {
+    const userString = localStorage.getItem('user');
+    return userString ? JSON.parse(userString).id : null;
+  };
+
+  const getReviewUserId = (review: Review): string => {
+    return typeof review.userId === 'string' 
+      ? review.userId 
+      : review.userId._id;
+  };
+
+  const isUserReview = (review: Review): boolean => {
+    const currentUserId = getCurrentUserId();
+    if (!currentUserId) return false;
+    return getReviewUserId(review) === currentUserId;
+  };
+
+  const getUserReview = (): Review | undefined => {
+    return reviews.find((r) => isUserReview(r));
+  };
+
+  const avgRating = reviews.length > 0 
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+    : null;
+
   useEffect(() => {
     if (!id) return;
     let mounted = true;
@@ -113,107 +106,185 @@ const MoviePage: React.FC = () => {
       }
     };
 
-    const fetchComments = async () => {
+    const fetchReviews = async () => {
       try {
-        const res = await apiClient.get<Comment[]>(`/api/v1/movies/${id}/comments`);
+        const res = await apiClient.get<Review[]>(`/api/v1/reviews/movie/${id}/`);
         if (!mounted) return;
-        setComments(res || []);
-      } catch (err) {
-        console.warn('no comments', err);
-      }
-    };
+        setReviews(res || []);
 
-    const fetchRating = async () => {
-      try {
-        const r = await apiClient.get<{ average: number; count: number; userRating?: number }>(
-          `/api/v1/movies/${id}/rating`
-        );
-        if (!mounted) return;
-        setAvgRating(r.average ?? null);
-        setRatingsCount(r.count ?? 0);
-        setUserRating(typeof r.userRating === 'number' ? r.userRating : null);
+        const currentUserId = getCurrentUserId();
+        if (currentUserId && res.length > 0) {
+          const hasReviewed = res.some((r) => getReviewUserId(r) === currentUserId);
+          setUserCommented(hasReviewed);
+        }
       } catch (err) {
-        // no-op: rating optional
+        console.warn('no reviews', err);
       }
     };
 
     fetchMovie();
-    fetchComments();
-    fetchRating();
+    fetchReviews();
 
     return () => {
       mounted = false;
     };
   }, [id]);
 
-  /**
-   * Handles the submission of a new comment.
-   * 
-   * Validates comment text, retrieves user info from localStorage,
-   * posts the comment to the API, and updates the comments list
-   * with the newly created comment.
-   * 
-   * @async
-   * @param {React.FormEvent} e - The form submission event
-   * @returns {Promise<void>}
-   */
-  const handleAddComment = async (e: React.FormEvent) => {
+  const handleAddReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !id) return;
+
+    const userString = localStorage.getItem('user');
+    const user = userString ? JSON.parse(userString) : null;
+    
+    if (!user?.id) {
+      window.alert('Debes iniciar sesión para dejar una reseña.');
+      return;
+    }
+
+    if (newRating === 0) {
+      window.alert('Por favor selecciona una calificación (1-5 estrellas).');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const userString = localStorage.getItem('user');
-      const user = userString ? JSON.parse(userString) : null;
-      const payload = { text: newComment, userId: user?.id };
-      const created = await apiClient.post<Comment>(`/api/v1/movies/${id}/comments`, payload);
-      setComments((s) => [created, ...s]);
+      const payload = { 
+        userId: user.id,
+        movieId: id,
+        comment: newComment,
+        rating: newRating
+      };
+
+      const created = await apiClient.post<Review>(`/api/v1/reviews`, payload);
+      
+      setReviews((prev) => [created, ...prev]);
+      setUserCommented(true);
       setNewComment('');
-    } catch (err) {
-      console.error('comment error', err);
+      setNewRating(0);
+    } catch (err: any) {
+      console.error('review error', err);
+      if (err?.response?.status === 409) {
+        window.alert('Ya has reseñado esta película.');
+        setUserCommented(true);
+      } else if (err?.response?.status === 400) {
+        window.alert('Faltan campos obligatorios. Asegúrate de agregar un comentario y una calificación.');
+      } else {
+        window.alert('Error al crear la reseña. Inténtalo de nuevo.');
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
-  /**
-   * Submits a user rating (1-5 stars) for the movie.
-   * 
-   * Validates user authentication, posts the rating to the API,
-   * and updates the local state with the new average rating,
-   * rating count, and user's rating. Uses optimistic UI updates.
-   * 
-   * @async
-   * @param {number} value - The rating value (1-5 stars)
-   * @returns {Promise<void>}
-   */
-  const submitRating = async (value: number) => {
-    if (!id) return;
-    const userString = localStorage.getItem('user');
-    const user = userString ? JSON.parse(userString) : null;
-    if (!user?.id) {
-      // Optionally redirect to login
-      window.alert('Debes iniciar sesión para calificar.');
-      return;
-    }
-
-    setRatingSubmitting(true);
-    try {
-      const res = await apiClient.post<{ average: number; count: number; userRating?: number }>(
-        `/api/v1/movies/${id}/rating`,
-        { userId: user.id, rating: value }
-      );
-      // Update local state from response (optimistic)
-      setAvgRating(res.average ?? null);
-      setRatingsCount(res.count ?? ratingsCount);
-      setUserRating(typeof res.userRating === 'number' ? res.userRating : value);
-    } catch (err) {
-      console.error('rating error', err);
-    } finally {
-      setRatingSubmitting(false);
+  const openEditModal = () => {
+    const userReview = getUserReview();
+    if (userReview) {
+      setEditComment(userReview.comment);
+      setEditRating(userReview.rating);
+      setIsModalOpen(true);
     }
   };
 
-  // Loading state
+  const closeEditModal = () => {
+    setIsModalOpen(false);
+    setEditComment('');
+    setEditRating(0);
+    setEditHoverRating(null);
+  };
+
+  const openDeleteModal = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleDeleteReview = async () => {
+    const userReview = getUserReview();
+    if (!userReview) return;
+
+    const userString = localStorage.getItem('user');
+    const user = userString ? JSON.parse(userString) : null;
+    
+    if (!user?.id) {
+      window.alert('Debes iniciar sesión para eliminar una reseña.');
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await apiClient.delete(`/api/v1/reviews/${userReview._id}`);
+      
+      setReviews((prev) => prev.filter((r) => r._id !== userReview._id));
+      setUserCommented(false);
+      closeDeleteModal();
+      
+      window.alert('Reseña eliminada exitosamente.');
+    } catch (err: any) {
+      console.error('delete review error', err);
+      if (err?.response?.status === 404) {
+        window.alert('No se encontró tu reseña.');
+      } else {
+        window.alert('Error al eliminar la reseña. Inténtalo de nuevo.');
+      }
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const updateReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editComment.trim() || !id) return;
+
+    const userString = localStorage.getItem('user');
+    const user = userString ? JSON.parse(userString) : null;
+    
+    if (!user?.id) {
+      window.alert('Debes iniciar sesión para editar una reseña.');
+      return;
+    }
+
+    if (editRating === 0) {
+      window.alert('Por favor selecciona una calificación (1-5 estrellas).');
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const payload = { 
+        userId: user.id,
+        movieId: id,
+        comment: editComment,
+        rating: editRating
+      };
+
+      const updated = await apiClient.put<Review>(`/api/v1/reviews`, payload);
+      
+      setReviews((prev) => 
+        prev.map((r) => 
+          isUserReview(r) ? updated : r
+        )
+      );
+      
+      closeEditModal();
+      
+      
+    } catch (err: any) {
+      console.error('update review error', err);
+      if (err?.response?.status === 404) {
+        window.alert('No se encontró tu reseña.');
+      } else if (err?.response?.status === 400) {
+        window.alert('Faltan campos obligatorios.');
+      } else {
+        window.alert('Error al actualizar la reseña. Inténtalo de nuevo.');
+      }
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   if (loading) {
     return (
       <main className="movie-page">
@@ -225,13 +296,12 @@ const MoviePage: React.FC = () => {
     );
   }
 
-  // Error state
   if (error || !movie) {
     return (
       <main className="movie-page">
         <div className="movie-error">
           <p>{error ?? 'Película no encontrada.'}</p>
-          <button className="btn-back" onClick={() => navigate(-1)}>Volver</button>
+          <button className="btn-back" onClick={() => navigate('/')}>Volver</button>
         </div>
       </main>
     );
@@ -248,43 +318,46 @@ const MoviePage: React.FC = () => {
           <p className="movie-desc">{movie.description}</p>
 
           <div className="movie-actions">
-            {/*<a className="btn-primary" href={movie.videoUrl} target="_blank" rel="noreferrer">Ver completa</a>*/}
-            <a className="btn-primary">Ver completa</a>
+            <button 
+              className="btn-primary"
+              onClick={() => setIsVideoModalOpen(true)}
+            >
+              Ver completa
+            </button>
             <button className="btn-secondary" onClick={() => navigate(-1)}>Volver</button>
+            {isVideoModalOpen && (
+              <VideoModal
+                videoUrl={movie.videoUrl}
+                title={movie.title}
+                movieId={movie._id}
+                onClose={() => setIsVideoModalOpen(false)}
+              />
+            )}
           </div>
 
-          {/* Rating UI */}
-          <div className="movie-rating" aria-label="Calificación de la película">
-            <div className="stars" role="radiogroup" aria-label="Calificar de 1 a 5 estrellas">
+          <div className="movie-rating" aria-label="Calificación promedio de la película">
+            <div className="stars">
               {[1,2,3,4,5].map((n) => {
-                const filled = hoverRating ? n <= hoverRating : userRating ? n <= userRating : avgRating ? n <= Math.round(avgRating) : false;
+                const filled = avgRating ? n <= Math.round(avgRating) : false;
                 return (
-                  <button
+                  <span
                     key={n}
-                    type="button"
                     className={`star ${filled ? 'filled' : ''}`}
-                    onMouseEnter={() => setHoverRating(n)}
-                    onMouseLeave={() => setHoverRating(null)}
-                    onFocus={() => setHoverRating(n)}
-                    onBlur={() => setHoverRating(null)}
-                    onClick={() => submitRating(n)}
-                    disabled={ratingSubmitting}
-                    aria-label={`${n} estrella${n>1?'s':''}`}
-                    aria-checked={userRating === n}
-                    role="radio"
-                    title={`${n} ${n===1?'estrella':'estrellas'}`}
+                    aria-hidden="true"
                   >
                     ★
-                  </button>
+                  </span>
                 );
               })}
             </div>
 
             <div className="rating-meta">
               {avgRating !== null ? (
-                <span className="avg-text">{avgRating.toFixed(1)} / 5 · {ratingsCount} voto{ratingsCount === 1 ? '' : 's'}</span>
+                <span className="avg-text">
+                  {avgRating.toFixed(1)} / 5 · {reviews.length} reseña{reviews.length === 1 ? '' : 's'}
+                </span>
               ) : (
-                <span className="avg-text">Sin calificaciones</span>
+                <span className="avg-text">Sin reseñas aún</span>
               )}
             </div>
           </div>
@@ -292,36 +365,216 @@ const MoviePage: React.FC = () => {
       </div>
 
       <section className="movie-comments">
-        <h2>Comentarios</h2>
+        <h2>Reseñas y Comentarios</h2>
 
-        <form className="comment-form" onSubmit={handleAddComment}>
-          <textarea
-            placeholder="Escribe tu comentario..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            rows={3}
-            required
-          />
-          <div className="comment-actions">
-            <button type="submit" className="btn-comment" disabled={submitting}>
-              {submitting ? 'Enviando…' : 'Agregar comentario'}
-            </button>
+        {!userCommented ? (
+          <form className="comment-form" onSubmit={handleAddReview}>
+            <div className="rating-input">
+              <label htmlFor="rating-stars">Tu calificación: {newRating > 0 ? `${newRating}/5` : '(selecciona una)'}</label>
+              <div className="stars" role="radiogroup" aria-label="Calificar de 1 a 5 estrellas" id="rating-stars">
+                {[1,2,3,4,5].map((n) => {
+                  const filled = hoverRating ? n <= hoverRating : n <= newRating;
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`star ${filled ? 'filled' : ''}`}
+                      onMouseEnter={() => setHoverRating(n)}
+                      onMouseLeave={() => setHoverRating(null)}
+                      onClick={() => setNewRating(n)}
+                      aria-label={`${n} estrella${n>1?'s':''}`}
+                      title={`${n} ${n===1?'estrella':'estrellas'}`}
+                    >
+                      ★
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <textarea
+              placeholder="Escribe tu comentario..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              rows={3}
+              required
+              minLength={3}
+              maxLength={1000}
+            />
+            <div className="comment-actions">
+              <button type="submit" className="btn-comment" disabled={submitting}>
+                {submitting ? 'Enviando…' : 'Publicar reseña'}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="already-reviewed-message">
+            <p>Ya has dejado una reseña para esta película</p>
+            <div className="button-group">
+              <button className="btn-edit" onClick={openEditModal}>
+                Editar mi reseña
+              </button>
+              <button className="btn-delete" onClick={openDeleteModal}>
+                Eliminar mi reseña
+              </button>
+            </div>
           </div>
-        </form>
+        )}
 
         <ul className="comments-list">
-          {comments.length === 0 && <li className="no-comments">Sé el primero en comentar.</li>}
-          {comments.map((c) => (
-            <li key={c._id} className="comment-item">
-              <div className="comment-head">
-                <strong className="comment-author">{c.userName ?? 'Usuario'}</strong>
-                <time className="comment-time">{new Date(c.createdAt).toLocaleString()}</time>
-              </div>
-              <p className="comment-text">{c.text}</p>
-            </li>
-          ))}
+          {reviews.length === 0 && <li className="no-comments">Sé el primero en dejar una reseña.</li>}
+          {reviews.map((review) => {
+            const userName = typeof review.userId === 'string' 
+              ? 'Usuario' 
+              : `${review.userId.firstName || ''} ${review.userId.lastName || ''}`.trim() || review.userId.email;
+
+            const isMyReview = isUserReview(review);
+
+            return (
+              <li key={review._id} className={`comment-item ${isMyReview ? 'my-review' : ''}`}>
+                <div className="comment-head">
+                  <strong className="comment-author">
+                    {userName}
+                    {isMyReview && <span className="badge-you"> (Tú)</span>}
+                  </strong>
+                  <div className="review-rating">
+                    {[1,2,3,4,5].map((n) => (
+                      <span key={n} className={`star-small ${n <= review.rating ? 'filled' : ''}`}>
+                        ★
+                      </span>
+                    ))}
+                    <span className="rating-number">{review.rating}/5</span>
+                  </div>
+                  <time className="comment-time">
+                    {review.createdAt ? new Date(review.createdAt).toLocaleString() : ''}
+                  </time>
+                </div>
+                <p className="comment-text">{review.comment}</p>
+                {isMyReview && (
+                  <div className="inline-buttons-group">
+                    <button className="btn-edit-inline" onClick={openEditModal}>
+                      Editar
+                    </button>
+                    <button className="btn-delete-inline" onClick={openDeleteModal}>
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
+
+      {/* Modal de edición */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={closeEditModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Editar tu reseña</h3>
+              <button className="btn-close" onClick={closeEditModal} aria-label="Cerrar modal">
+                ✕
+              </button>
+            </div>
+            
+            <form className="modal-form" onSubmit={updateReview}>
+              <div className="rating-input">
+                <label htmlFor="edit-rating-stars">
+                  Tu calificación: {editRating > 0 ? `${editRating}/5` : '(selecciona una)'}
+                </label>
+                <div className="stars" role="radiogroup" aria-label="Calificar de 1 a 5 estrellas" id="edit-rating-stars">
+                  {[1,2,3,4,5].map((n) => {
+                    const filled = editHoverRating ? n <= editHoverRating : n <= editRating;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        className={`star ${filled ? 'filled' : ''}`}
+                        onMouseEnter={() => setEditHoverRating(n)}
+                        onMouseLeave={() => setEditHoverRating(null)}
+                        onClick={() => setEditRating(n)}
+                        aria-label={`${n} estrella${n>1?'s':''}`}
+                        title={`${n} ${n===1?'estrella':'estrellas'}`}
+                      >
+                        ★
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <textarea
+                placeholder="Escribe tu comentario..."
+                value={editComment}
+                onChange={(e) => setEditComment(e.target.value)}
+                rows={4}
+                required
+                minLength={3}
+                maxLength={1000}
+              />
+
+              <div className="modal-actions">
+                <button 
+                  type="button" 
+                  className="btn-cancel" 
+                  onClick={closeEditModal}
+                  disabled={updating}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn-save" 
+                  disabled={updating}
+                >
+                  {updating ? 'Guardando…' : 'Guardar cambios'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      
+
+      {/* modal de confirmacion de eliminacion */}
+      {isDeleteModalOpen && (
+        <div className="modal-overlay" onClick={closeDeleteModal}>
+          <div className="modal-content modal-delete" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Eliminar reseña</h3>
+              <button className="btn-close" onClick={closeDeleteModal} aria-label="Cerrar modal">
+                ✕
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <p className="delete-warning">
+                ¿Estás seguro de que deseas eliminar tu reseña? Esta acción no se puede deshacer.
+              </p>
+            </div>
+
+            <div className="modal-actions">
+              <button 
+                type="button" 
+                className="btn-cancel" 
+                onClick={closeDeleteModal}
+                disabled={deleting}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button" 
+                className="btn-delete-confirm" 
+                onClick={handleDeleteReview}
+                disabled={deleting}
+              >
+                {deleting ? 'Eliminando…' : 'Eliminar reseña'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
