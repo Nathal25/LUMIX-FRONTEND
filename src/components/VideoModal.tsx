@@ -89,7 +89,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const progressRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
-  const navigate = useNavigate(); // added
+  const navigate = useNavigate(); 
 
   const [isPlaying, setIsPlaying] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);

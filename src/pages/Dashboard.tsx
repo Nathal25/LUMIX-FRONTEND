@@ -38,6 +38,7 @@ interface Movie {
  * - Video modal for playback
  * - Loading and error states
  * - Responsive grid layout
+ * - Skeleton loader for better UX
  * 
  * @component
  * @returns {JSX.Element} The rendered dashboard with video grid and modal
@@ -106,16 +107,27 @@ export const Dashboard: React.FC = () => {
     setLimit((prev) => prev + PAGE_STEP);
   };
 
+  /**
+   * Renders skeleton loader placeholders while content is loading
+   */
+  const renderSkeletons = () => {
+    return Array.from({ length: PAGE_STEP }).map((_, index) => (
+      <div key={`skeleton-${index}`} className="video-item skeleton">
+        <div className="skeleton-thumbnail"></div>
+        <div className="skeleton-title"></div>
+      </div>
+    ));
+  };
+
   // Layout
   return (
     <main className="dashboard-page">
       <h1 className="dashboard-title">Películas populares</h1>
 
       {loading ? (
-        <div className="loading-wrapper" role="status" aria-live="polite" aria-label="Cargando videos">
-          <div className="spinner" aria-hidden="true" />
-          <p className="loading-message">Cargando videos...</p>
-        </div>
+        <section className="videos-grid" aria-busy="true" aria-label="Cargando videos">
+          {renderSkeletons()}
+        </section>
       ) : error ? (
         <p className="error-message">{error}</p>
       ) : (
@@ -132,7 +144,12 @@ export const Dashboard: React.FC = () => {
                   aria-label={`Abrir reproductor para ${video.title}`}
                   title={`Abrir: ${video.title}`}
                 >
-                  <img className="video-thumbnail" src={video.imageUrl} alt={video.title} />
+                  <div className="video-thumbnail-wrapper">
+                    <img className="video-thumbnail" src={video.imageUrl} alt={video.title} />
+                    <div className="video-overlay">
+                      <span className="play-icon">▶</span>
+                    </div>
+                  </div>
                   <h3 className="video-name">{video.title}</h3>
                 </button>
               ))
