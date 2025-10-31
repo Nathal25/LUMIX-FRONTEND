@@ -50,7 +50,7 @@ export const Footer: React.FC = () => {
             <ul className="sitemap-list">
               <li><Link to="/reset-password">Restablecer contraseña</Link></li>
               <li><a href="mailto:soporte@lumix.app">Contacto</a></li>
-              <li><a href="https://drive.google.com/file/d/1Tdu4rgTzgBiPettgwRaW2Um7pYCAwAY0/view?usp=sharing" target="_blank">Manual de usuario</a></li>
+              <li><a href="https://drive.google.com/file/d/19IZT53rHzTaIuqkLq8Uz9_eEjzwAh6ff/view?usp=sharing" target="_blank">Manual de usuario</a></li>
             </ul>
           </div>
         </nav>
