@@ -53,7 +53,7 @@ export const AboutPage: React.FC = () => {
             <div className="avatar" aria-hidden="true">NO</div>
             <div className="team-info">
               <strong className="team-name">Nathalia Ortiz</strong>
-              <span className="team-role">Product</span>
+              <span className="team-role">Product Owner</span>
               <p className="team-bio">Define la visión del producto y mejora la experiencia.</p>
             </div>
           </li>
@@ -61,7 +61,7 @@ export const AboutPage: React.FC = () => {
           <li className="team-card">
             <div className="avatar" aria-hidden="true">FC</div>
             <div className="team-info">
-              <strong className="team-name">Francisco Cardona</strong>
+              <strong className="team-name">Fernando Cardona</strong>
               <span className="team-role">Database</span>
               <p className="team-bio">Define la estructura de datos y optimiza consultas.</p>
             </div>
