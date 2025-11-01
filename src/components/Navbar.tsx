@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import '../styles/Navbar.scss';
 import authService from '../services/authService';
+import { useSpeech } from '../contexts/SpeechContext';
 
 /**
  * Props for the Navbar component.
@@ -70,6 +71,9 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement | null>(null); // ref to detect outside clicks
+  
+  // Accessibility: Speech Synthesis (global context)
+  const { isSupported, isVoiceEnabled, toggleVoiceAssistance, handleSpeak } = useSpeech();
 
   /**
    * Initializes and manages authentication state on component mount.
@@ -273,15 +277,49 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
       </button>
 
       <nav className={`navbar-links ${open ? 'open' : ''}`} role="navigation">
+        {/* Botón de asistencia de voz (visible solo si el navegador lo soporta) */}
+        {isSupported && (
+          <button
+            type="button"
+            className={`voice-button ${isVoiceEnabled ? 'active' : ''}`}
+            onClick={toggleVoiceAssistance}
+            aria-label={isVoiceEnabled ? 'Desactivar asistencia de voz' : 'Activar asistencia de voz'}
+            title={isVoiceEnabled ? 'Desactivar asistencia de voz' : 'Activar asistencia de voz'}
+          >
+            <img 
+              src={isVoiceEnabled ? '/icons/volume-on.svg' : '/icons/volume-off.svg'} 
+              alt={isVoiceEnabled ? 'Voz activada' : 'Voz desactivada'} 
+            />
+          </button>
+        )}
+        
         {!isAuthenticated && (
           <>
-            <Link to="/" className="navbar-link" onClick={close}>
+            <Link 
+              to="/" 
+              className="navbar-link" 
+              onClick={close}
+              onMouseEnter={() => handleSpeak('Inicio')}
+              onFocus={() => handleSpeak('Inicio')}
+            >
               Inicio
             </Link>
-            <Link to="/register" className="navbar-link" onClick={close}>
+            <Link 
+              to="/register" 
+              className="navbar-link" 
+              onClick={close}
+              onMouseEnter={() => handleSpeak('Registrarse')}
+              onFocus={() => handleSpeak('Registrarse')}
+            >
               Registrarse
             </Link>
-            <Link to="/login" className="navbar-button" onClick={close}>
+            <Link 
+              to="/login" 
+              className="navbar-button" 
+              onClick={close}
+              onMouseEnter={() => handleSpeak('Iniciar sesión')}
+              onFocus={() => handleSpeak('Iniciar sesión')}
+            >
               Iniciar sesión
             </Link>
           </>
@@ -289,10 +327,22 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
 
         {isAuthenticated && (
           <>
-            <Link to="/dashboard" className="navbar-link" onClick={close}>
+            <Link 
+              to="/dashboard" 
+              className="navbar-link" 
+              onClick={close}
+              onMouseEnter={() => handleSpeak('Películas')}
+              onFocus={() => handleSpeak('Películas')}
+            >
               Películas
             </Link>
-            <Link to="/profile" className="navbar-link" onClick={close}>
+            <Link 
+              to="/profile" 
+              className="navbar-link" 
+              onClick={close}
+              onMouseEnter={() => handleSpeak('Perfil')}
+              onFocus={() => handleSpeak('Perfil')}
+            >
               Perfil
             </Link>
             {/* Provisional */}
@@ -309,6 +359,8 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
                 aria-expanded={isSearchOpen}
                 aria-label={isSearchOpen ? 'Cerrar búsqueda' : 'Abrir búsqueda'}
                 onClick={() => setIsSearchOpen((v) => !v)}
+                onMouseEnter={() => handleSpeak('Buscar películas')}
+                onFocus={() => handleSpeak('Buscar películas')}
               >
                 <img src="/icons/busqueda.svg" alt="Buscar" />
               </button>
@@ -334,6 +386,8 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
                 to="/favorites"
                 className="favorite-button"
                 aria-label="Favoritos"
+                onMouseEnter={() => handleSpeak('Favoritos')}
+                onFocus={() => handleSpeak('Favoritos')}
                 >
                 <img src="/icons/love.svg" alt="Favoritos" />
                 </Link>
@@ -342,7 +396,13 @@ export const Navbar: React.FC<Props> = ({ isAuthenticated: isAuthProp, onLogout 
             {/*  ----------------------------------- */}
             {/*  ----------------------------------- */}
             {/*  ----------------------------------- */}
-            <button type="button" className="navbar-button" onClick={handleLogout}>
+            <button 
+              type="button" 
+              className="navbar-button" 
+              onClick={handleLogout}
+              onMouseEnter={() => handleSpeak('Cerrar sesión')}
+              onFocus={() => handleSpeak('Cerrar sesión')}
+            >
               Cerrar sesión
             </button>
           </>

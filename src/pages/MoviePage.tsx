@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import apiClient from '../services/apiClient';
 import VideoModal from '../components/VideoModal';
 import '../styles/MoviePage.scss';
+import { useSpeech } from '../contexts/SpeechContext';
 
 
 type Movie = {
@@ -59,6 +60,9 @@ const MoviePage: React.FC = () => {
   // Delete modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Accessibility: Speech Synthesis (from global context)
+  const { handleSpeak } = useSpeech();
 
   const getCurrentUserId = (): string | null => {
     const userString = localStorage.getItem('user');
@@ -321,10 +325,19 @@ const MoviePage: React.FC = () => {
             <button 
               className="btn-primary"
               onClick={() => setIsVideoModalOpen(true)}
+              onMouseEnter={() => handleSpeak('Ver película completa')}
+              onFocus={() => handleSpeak('Ver película completa')}
             >
               Ver completa
             </button>
-            <button className="btn-secondary" onClick={() => navigate(-1)}>Volver</button>
+            <button 
+              className="btn-secondary" 
+              onClick={() => navigate(-1)}
+              onMouseEnter={() => handleSpeak('Volver')}
+              onFocus={() => handleSpeak('Volver')}
+            >
+              Volver
+            </button>
             {isVideoModalOpen && (
               <VideoModal
                 videoUrl={movie.videoUrl}
@@ -379,9 +392,13 @@ const MoviePage: React.FC = () => {
                       key={n}
                       type="button"
                       className={`star ${filled ? 'filled' : ''}`}
-                      onMouseEnter={() => setHoverRating(n)}
+                      onMouseEnter={() => {
+                        setHoverRating(n);
+                        handleSpeak(`${n} ${n === 1 ? 'estrella' : 'estrellas'}`);
+                      }}
                       onMouseLeave={() => setHoverRating(null)}
                       onClick={() => setNewRating(n)}
+                      onFocus={() => handleSpeak(`${n} ${n === 1 ? 'estrella' : 'estrellas'}`)}
                       aria-label={`${n} estrella${n>1?'s':''}`}
                       title={`${n} ${n===1?'estrella':'estrellas'}`}
                     >
@@ -402,7 +419,13 @@ const MoviePage: React.FC = () => {
               maxLength={1000}
             />
             <div className="comment-actions">
-              <button type="submit" className="btn-comment" disabled={submitting}>
+              <button 
+                type="submit" 
+                className="btn-comment" 
+                disabled={submitting}
+                onMouseEnter={() => handleSpeak('Publicar reseña')}
+                onFocus={() => handleSpeak('Publicar reseña')}
+              >
                 {submitting ? 'Enviando…' : 'Publicar reseña'}
               </button>
             </div>
@@ -411,10 +434,20 @@ const MoviePage: React.FC = () => {
           <div className="already-reviewed-message">
             <p>Ya has dejado una reseña para esta película</p>
             <div className="button-group">
-              <button className="btn-edit" onClick={openEditModal}>
+              <button 
+                className="btn-edit" 
+                onClick={openEditModal}
+                onMouseEnter={() => handleSpeak('Editar mi reseña')}
+                onFocus={() => handleSpeak('Editar mi reseña')}
+              >
                 Editar mi reseña
               </button>
-              <button className="btn-delete" onClick={openDeleteModal}>
+              <button 
+                className="btn-delete" 
+                onClick={openDeleteModal}
+                onMouseEnter={() => handleSpeak('Eliminar mi reseña')}
+                onFocus={() => handleSpeak('Eliminar mi reseña')}
+              >
                 Eliminar mi reseña
               </button>
             </div>

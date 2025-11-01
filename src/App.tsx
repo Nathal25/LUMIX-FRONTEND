@@ -14,6 +14,7 @@ import { Dashboard } from './pages/Dashboard';
 import {ChangePasswordPage} from './pages/ChangePasswordPage';
 import { Footer } from './components/Footer';
 import MoviePage from './pages/MoviePage';
+import { SpeechProvider } from './contexts/SpeechContext';
 
 /**
  * Main Application Component
@@ -35,24 +36,26 @@ import MoviePage from './pages/MoviePage';
 const App: React.FC = () => {
 	return (
 		<BrowserRouter>
-			<Navbar />
-			<main className="pt-16">
-				<Routes>
-					<Route path="/" element={<HomePage />} />
-					<Route path="/about" element={<AboutPage />} />
-					<Route path="/login" element={<LoginPage />} />
-					<Route path="/register" element={<RegisterPage />} />
-					<Route path="/reset-password" element={<ResetPasswordPage />} />
-					<Route path="/recover-password" element={<NewPasswordPage />} />
-					<Route path="/profile" element={<ProfilePage />} />
-					<Route path="/delete-account" element={<DeleteAccountPage />} />
-					<Route path="/dashboard" element={<Dashboard />} />
-					<Route path="/favorites" element={<FavoritesPage />} /> {/* --Provisional route-- */}
-					<Route path="/movies/:id" element={<MoviePage />} />
-					<Route path="/changePassword" element={<ChangePasswordPage />} />
-				</Routes>
-			</main>
-			<Footer />
+			<SpeechProvider>
+				<Navbar />
+				<main className="pt-16">
+					<Routes>
+						<Route path="/" element={<HomePage />} />
+						<Route path="/about" element={<AboutPage />} />
+						<Route path="/login" element={<LoginPage />} />
+						<Route path="/register" element={<RegisterPage />} />
+						<Route path="/reset-password" element={<ResetPasswordPage />} />
+						<Route path="/recover-password" element={<NewPasswordPage />} />
+						<Route path="/profile" element={<ProfilePage />} />
+						<Route path="/delete-account" element={<DeleteAccountPage />} />
+						<Route path="/dashboard" element={<Dashboard />} />
+						<Route path="/favorites" element={<FavoritesPage />} /> {/* --Provisional route-- */}
+						<Route path="/movies/:id" element={<MoviePage />} />
+						<Route path="/changePassword" element={<ChangePasswordPage />} />
+					</Routes>
+				</main>
+				<Footer />
+			</SpeechProvider>
 		</BrowserRouter>
 	);
 };
