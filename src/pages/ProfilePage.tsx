@@ -4,70 +4,109 @@ import "../styles/ProfilePage.scss";
 import authService from "../services/authService";
 import { ToastContainer, toast, Bounce } from 'react-toastify';
 
-
 /**
- * Representa los datos de un usuario en el sistema.
- * @interface
+ * User data type definition for the system.
+ * 
+ * @typedef {Object} User
+ * @property {string} firstName - User's first name.
+ * @property {string} lastName - User's last name(s).
+ * @property {number} age - User's age.
+ * @property {string} email - User's email address.
  */
 type User = {
-  /** User's first name */
   firstName: string;
-  /** User's last name(s) */
   lastName: string;
-  /** User's age */
   age: number;
-  /** User's email address */
   email: string;
 };
 
 /**
- * Componente de página de perfil de usuario.
+ * User profile page component.
  * 
- * Permite visualizar y editar la información personal del usuario autenticado.
- * Los datos se cargan desde `localStorage` al montar el componente y se sincronizan
- * con el backend al guardar cambios.
+ * Allows viewing and editing the authenticated user's personal information.
+ * Data is loaded from `localStorage` on component mount and synchronized
+ * with the backend when saving changes.
+ * 
+ * Features:
+ * - Load user data from localStorage
+ * - Edit first name, last name, and age
+ * - Form validation
+ * - Save changes to backend and localStorage
+ * - Reset form to original values
+ * - Navigate to delete account page
+ * - Navigate to change password page
+ * - Toast notifications for success/error feedback
  * 
  * @component
- * @returns {JSX.Element} Página de perfil con formulario de edición
- * 
  * @example
  * ```tsx
  * <ProfilePage />
  * ```
+ * 
+ * @returns {JSX.Element} Profile page with edit form.
  */
 export const ProfilePage: React.FC = () => {
+  /**
+   * Navigation hook for programmatic routing.
+   * @type {Function}
+   */
   const navigate = useNavigate();
+  
+  /**
+   * Toast notification function.
+   * @function notify
+   * @param {string} m - Message to display in toast.
+   */
   const notify = (m:string) => toast(m);
   
-  
-  /** State that maintains the original user data for restoration */
+  /**
+   * State that maintains the original user data for restoration.
+   * Used to reset the form to initial values.
+   * @type {[User | null, Function]}
+   */
   const [original, setOriginal] = useState<User | null>(null);
   
-  /** Estado con los datos actuales del usuario (editables) */
+  /**
+   * State with current user data (editable).
+   * @type {[User | null, Function]}
+   */
   const [user, setUser] = useState<User | null>(null);
   
-  /** List of validation errors */
+  /**
+   * List of validation errors.
+   * @type {[string[], Function]}
+   */
   const [errors, setErrors] = useState<string[]>([]);
   
-  /** Indicates if the save operation was successful */
+  /**
+   * Indicates if the save operation was successful.
+   * @type {[boolean, Function]}
+   */
   const [success, setSuccess] = useState(false);
   
-  /** Indicates if there is a save operation in progress */
+  /**
+   * Indicates if there is a save operation in progress.
+   * @type {[boolean, Function]}
+   */
   const [loading, setLoading] = useState(false);
   
-  /** Indicates if user information is being loaded from localStorage */
+  /**
+   * Indicates if user information is being loaded from localStorage.
+   * @type {[boolean, Function]}
+   */
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   /**
-   * Efecto que se ejecuta al montar el componente.
-   * Carga los datos del usuario desde localStorage y redirige al login si no existen.
+   * Effect hook that runs when the component mounts.
+   * Loads user data from localStorage and redirects to login if data doesn't exist.
    */
   useEffect(() => {
     /**
-     * Carga y parsea los datos del usuario desde localStorage.
-     * Si no hay datos o ocurre un error, redirige al usuario a la página de login.
+     * Loads and parses user data from localStorage.
+     * If no data exists or an error occurs, redirects user to login page.
      * 
-     * @throws {Error} Si ocurre un error al parsear los datos JSON
+     * @function loadUserFromStorage
+     * @throws {Error} If an error occurs while parsing JSON data.
      */
     const loadUserFromStorage = () => {
       try {
@@ -97,9 +136,15 @@ export const ProfilePage: React.FC = () => {
   }, [navigate]);
 
   /**
-   * Valida los datos del formulario del usuario.
+   * Validates the user form data.
    * 
-   * @returns {string[]} Array de mensajes de error. Array vacío si no hay errores.
+   * Checks for:
+   * - Non-empty first name
+   * - Non-empty last name
+   * - Valid age (positive number)
+   * 
+   * @function validate
+   * @returns {string[]} Array of error messages. Empty array if no errors.
    */
   const validate = (): string[] => {
     if (!user) return ["Usuario no cargado"];
@@ -112,11 +157,12 @@ export const ProfilePage: React.FC = () => {
   };
 
   /**
-   * Maneja el envío del formulario de actualización de perfil.
-   * Valida los datos, envía la petición al backend y actualiza localStorage.
+   * Handles the profile update form submission.
+   * Validates data, sends request to backend, and updates localStorage.
    * 
    * @async
-   * @param {React.FormEvent} ev - Evento del formulario
+   * @function handleSubmit
+   * @param {React.FormEvent} ev - Form submission event.
    * @returns {Promise<void>}
    */
   const handleSubmit = async (ev: React.FormEvent): Promise<void> => {
@@ -166,8 +212,11 @@ export const ProfilePage: React.FC = () => {
   };
 
   /**
-   * Restaura los datos del usuario a su estado original.
-   * Limpia errores y mensajes de éxito.
+   * Restores user data to its original state.
+   * Clears errors and success messages.
+   * 
+   * @function handleReset
+   * @returns {void}
    */
   const handleReset = (): void => {
     if (original) {
@@ -178,16 +227,24 @@ export const ProfilePage: React.FC = () => {
   };
 
   /**
-   * Redirige a la página de eliminación de cuenta.
+   * Navigates to the delete account page.
+   * 
+   * @function handleDelete
+   * @returns {void}
    */
   const handleDelete = (): void => {
     navigate("/delete-account");
   };
 
+  /**
+   * Navigates to the change password page.
+   * 
+   * @function handleChangePassword
+   * @returns {void}
+   */
   const handleChangePassword = (): void => {
     navigate("/changePassword");
   };
-
 
   if (isLoadingUser || !user) {
     return (

@@ -97,7 +97,7 @@ export const FavoritesPage: React.FC = () => {
     }
   };
 
-  // NEW: close modal and if a favorite was removed inside modal, remove it from UI
+  
   const handleModalClose = () => {
     if (removedDuringModal) {
       setVideos((prev) => prev.filter((v) => v._id !== removedDuringModal));
@@ -116,7 +116,7 @@ export const FavoritesPage: React.FC = () => {
         return;
       }
 
-      // 1️⃣ Get user's favorites
+      
       const favResponse = await apiClient.get<Favorite[]>(`/api/v1/favorites/user/${userId}`);
       const favorites = favResponse || [];
 
@@ -126,15 +126,15 @@ export const FavoritesPage: React.FC = () => {
         return;
       }
 
-      // 2️⃣ Get details of associated movies
+      
       const movieRequests = favorites.map((fav) =>
         apiClient.get<Movie>(`/api/v1/movies/${fav.movieId}`).then((movie) => ({
           ...movie,
-          favoriteId: fav._id, // Associate the favorite ID
+          favoriteId: fav._id, 
         }))
       );
 
-      // Wait for all responses
+      
       const movies = await Promise.all(movieRequests);
 
       // Save to state
@@ -236,8 +236,8 @@ export const FavoritesPage: React.FC = () => {
           videoUrl={selectedVideo.videoUrl}
           title={selectedVideo.title}
           movieId={selectedVideo._id}
-          onClose={handleModalClose}              // use the wrapper close
-          onFavoriteChange={handleFavoriteChange} // pass callback
+          onClose={handleModalClose}              
+          onFavoriteChange={handleFavoriteChange} 
         />
       )}
     </main>

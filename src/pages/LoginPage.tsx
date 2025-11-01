@@ -5,17 +5,17 @@ import "../styles/LoginPage.scss";
 import { useSpeech } from "../contexts/SpeechContext";
 
 /**
- * Página de inicio de sesión de usuarios.
+ * Login page component for user authentication.
  *
- * Este componente renderiza un formulario que permite a los usuarios autenticarse
- * con su correo electrónico y contraseña. Al iniciar sesión exitosamente, redirige
- * al usuario al panel principal (`/dashboard`).
+ * This component renders a form that allows users to authenticate
+ * with their email and password. Upon successful login, it redirects
+ * the user to the main dashboard (`/dashboard`).
  *
- * Se comunica con `authService` para:
- * - Enviar las credenciales al backend (`login`)
- * - Verificar si el usuario está autenticado (`checkAuth`)
+ * It communicates with `authService` to:
+ * - Send credentials to the backend (`login`)
+ * - Verify if the user is authenticated (`checkAuth`)
  *
- * También maneja los errores de autenticación y muestra mensajes en pantalla.
+ * It also handles authentication errors and displays messages on screen.
  *
  * @component
  * @example
@@ -23,35 +23,55 @@ import { useSpeech } from "../contexts/SpeechContext";
  * <LoginPage />
  * ```
  *
- * @returns {JSX.Element} El componente de la página de inicio de sesión.
+ * @returns {JSX.Element} The login page component.
  */
 export const LoginPage: React.FC = () => {
-  /** State of the email entered by the user */
+  /**
+   * State for the email entered by the user.
+   * @type {string}
+   */
   const [email, setEmail] = useState("");
 
-  /** State of the password entered by the user */
+  /**
+   * State for the password entered by the user.
+   * @type {string}
+   */
   const [password, setPassword] = useState("");
 
-  /** State of the error message shown in case of authentication failure */
+  /**
+   * State for the error message shown in case of authentication failure.
+   * @type {string}
+   */
   const [error, setError] = useState("");
 
-  /** State indicating if the login request is in progress */
+  /**
+   * State indicating if the login request is in progress.
+   * @type {boolean}
+   */
   const [loading, setLoading] = useState(false);
 
-  /** Navigation hook to redirect to dashboard after login */
+  /**
+   * Navigation hook to redirect to dashboard after login.
+   * @type {Function}
+   */
   const navigate = useNavigate();
 
-  /** Speech synthesis context for accessibility */
+  /**
+   * Speech synthesis context for accessibility features.
+   * @type {Object}
+   */
   const { handleSpeak } = useSpeech();
 
   /**
-   * Manager for form submission.
+   * Handles the form submission.
    *
    * Sends the credentials to the authentication service (`authService.login`),
    * checks if the user was authenticated (`authService.checkAuth`) and redirects
-   * to the main panel. In case of error, it shows a descriptive message.
+   * to the main dashboard. In case of error, it displays a descriptive message.
    *
-   * @param {FormEvent} e - Evento del formulario.
+   * @async
+   * @function handleSubmit
+   * @param {FormEvent} e - The form event.
    * @returns {Promise<void>}
    */
   const handleSubmit = async (e: FormEvent): Promise<void> => {
