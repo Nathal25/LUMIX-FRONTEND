@@ -3,15 +3,69 @@ import authService from '../services/authService';
 import "../styles/ResetPasswordPage.scss";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Password reset page component.
+ * 
+ * Allows users to request a password reset by entering their email address.
+ * Sends a request to the backend which will email password reset instructions
+ * to the provided email address if it exists in the system.
+ * 
+ * Features:
+ * - Email input validation
+ * - Loading state during API request
+ * - Success message display
+ * - Error handling and display
+ * - Navigation back to login page
+ * 
+ * @component
+ * @example
+ * ```tsx
+ * <ResetPasswordPage />
+ * ```
+ * 
+ * @returns {JSX.Element} The password reset page component.
+ */
 export const ResetPasswordPage: React.FC = () => {
+  /**
+   * State for the email address entered by the user.
+   * @type {[string, Function]}
+   */
   const [email, setEmail] = useState('');
+  
+  /**
+   * State indicating if the reset request is in progress.
+   * @type {[boolean, Function]}
+   */
   const [loading, setLoading] = useState(false);
+  
+  /**
+   * State for error messages.
+   * @type {[string, Function]}
+   */
   const [error, setError] = useState('');
+  
+  /**
+   * State indicating if the reset email was sent successfully.
+   * @type {[boolean, Function]}
+   */
   const [success, setSuccess] = useState(false);
 
-  /** Navigation hook to redirect to dashboard after login */
-    const navigate = useNavigate();
+  /**
+   * Navigation hook for programmatic routing.
+   * @type {Function}
+   */
+  const navigate = useNavigate();
 
+  /**
+   * Handles the password reset form submission.
+   * Sends the email to the authentication service and displays
+   * success or error messages accordingly.
+   * 
+   * @async
+   * @function handleSubmit
+   * @param {FormEvent} e - Form submission event.
+   * @returns {Promise<void>}
+   */
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
@@ -22,7 +76,7 @@ export const ResetPasswordPage: React.FC = () => {
       const response = await authService.forgotPassword(email);
       console.log('Correo enviado:', response.message);
       setSuccess(true);
-      setEmail(''); // Limpiar el campo
+      setEmail(''); // Clear the field
     } catch (err: any) {
       setError(err.message || 'Error al enviar el correo de recuperación');
       console.error('Error:', err);

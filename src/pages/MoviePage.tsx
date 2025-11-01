@@ -6,8 +6,17 @@ import '../styles/MoviePage.scss';
 import { useSpeech } from '../contexts/SpeechContext';
 import { ToastContainer, toast, Bounce } from 'react-toastify';
 
-
-
+/**
+ * Movie entity type definition.
+ * @typedef {Object} Movie
+ * @property {string} _id - Unique identifier for the movie.
+ * @property {string} title - Title of the movie.
+ * @property {string} imageUrl - URL of the movie poster image.
+ * @property {string} videoUrl - URL of the movie video file.
+ * @property {string} [author] - Author or director of the movie.
+ * @property {number} [duration] - Duration of the movie in seconds.
+ * @property {string} [description] - Brief description of the movie.
+ */
 type Movie = {
   _id: string;
   title: string;
@@ -18,6 +27,14 @@ type Movie = {
   description?: string;
 };
 
+/**
+ * User data type definition.
+ * @typedef {Object} UserData
+ * @property {string} _id - Unique identifier for the user.
+ * @property {string} [firstName] - First name of the user.
+ * @property {string} [lastName] - Last name of the user.
+ * @property {string} email - Email address of the user.
+ */
 type UserData = {
   _id: string;
   firstName?: string;
@@ -25,6 +42,18 @@ type UserData = {
   email: string;
 };
 
+/**
+ * Review entity type definition.
+ * @typedef {Object} Review
+ * @property {string} _id - Unique identifier for the review.
+ * @property {string | UserData} userId - User ID or populated user object.
+ * @property {string} [userName] - Display name of the user who wrote the review.
+ * @property {string} movieId - ID of the movie being reviewed.
+ * @property {string} comment - Text content of the review.
+ * @property {number} rating - Star rating from 1 to 5.
+ * @property {string} [createdAt] - ISO timestamp of review creation.
+ * @property {string} [updatedAt] - ISO timestamp of last review update.
+ */
 type Review = {
   _id: string;
   userId: string | UserData; 
@@ -36,69 +65,230 @@ type Review = {
   updatedAt?: string;
 };
 
+/**
+ * Movie detail page component.
+ * 
+ * Displays comprehensive information about a specific movie including:
+ * - Movie poster, title, author, duration, and description
+ * - Average rating and review count
+ * - Full video player via modal
+ * - User reviews section with CRUD operations
+ * - Accessibility features via speech synthesis
+ * 
+ * Users can:
+ * - View the complete movie in a video modal
+ * - Add a review with rating (if not already reviewed)
+ * - Edit or delete their own review
+ * - View all reviews from other users
+ * 
+ * @component
+ * @example
+ * ```tsx
+ * // Accessed via route: /movies/:id
+ * <MoviePage />
+ * ```
+ * 
+ * @returns {JSX.Element} The movie detail page component.
+ */
 const MoviePage: React.FC = () => {
+  /**
+   * Movie ID from URL parameters.
+   * @type {string | undefined}
+   */
   const { id } = useParams<{ id: string }>();
+  
+  /**
+   * Navigation hook for programmatic routing.
+   * @type {Function}
+   */
   const navigate = useNavigate();
+  
+  /**
+   * Toast notification function.
+   * @function notify
+   * @param {string} m - Message to display in toast.
+   */
   const notify = (m:string) => toast(m);
   
-
+  /**
+   * State for the current movie data.
+   * @type {[Movie | null, Function]}
+   */
   const [movie, setMovie] = useState<Movie | null>(null);
+  
+  /**
+   * State for loading status.
+   * @type {[boolean, Function]}
+   */
   const [loading, setLoading] = useState(true);
+  
+  /**
+   * State for video modal visibility.
+   * @type {[boolean, Function]}
+   */
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  
+  /**
+   * State for error messages.
+   * @type {[string | null, Function]}
+   */
   const [error, setError] = useState<string | null>(null);
+  
+  /**
+   * State indicating if current user has already commented.
+   * @type {[boolean, Function]}
+   */
   const [userCommented, setUserCommented] = useState(false);
 
+  /**
+   * State for the list of all reviews.
+   * @type {[Review[], Function]}
+   */
   const [reviews, setReviews] = useState<Review[]>([]);
+  
+  /**
+   * State for new comment text input.
+   * @type {[string, Function]}
+   */
   const [newComment, setNewComment] = useState('');
+  
+  /**
+   * State for new review rating (1-5 stars).
+   * @type {[number, Function]}
+   */
   const [newRating, setNewRating] = useState<number>(0);
+  
+  /**
+   * State for hover effect on rating stars.
+   * @type {[number | null, Function]}
+   */
   const [hoverRating, setHoverRating] = useState<number | null>(null);
+  
+  /**
+   * State indicating if a review submission is in progress.
+   * @type {[boolean, Function]}
+   */
   const [submitting, setSubmitting] = useState(false);
 
-  // Modal states
+  /**
+   * State for edit modal visibility.
+   * @type {[boolean, Function]}
+   */
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  /**
+   * State for edit comment text.
+   * @type {[string, Function]}
+   */
   const [editComment, setEditComment] = useState('');
+  
+  /**
+   * State for edit review rating.
+   * @type {[number, Function]}
+   */
   const [editRating, setEditRating] = useState<number>(0);
+  
+  /**
+   * State for hover effect on edit rating stars.
+   * @type {[number | null, Function]}
+   */
   const [editHoverRating, setEditHoverRating] = useState<number | null>(null);
+  
+  /**
+   * State indicating if a review update is in progress.
+   * @type {[boolean, Function]}
+   */
   const [updating, setUpdating] = useState(false);
 
-  // Delete modal states
+  /**
+   * State for delete confirmation modal visibility.
+   * @type {[boolean, Function]}
+   */
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  
+  /**
+   * State indicating if a review deletion is in progress.
+   * @type {[boolean, Function]}
+   */
   const [deleting, setDeleting] = useState(false);
 
-  // Accessibility: Speech Synthesis (from global context)
+  /**
+   * Speech synthesis context for accessibility features.
+   * @type {Object}
+   */
   const { handleSpeak } = useSpeech();
 
+  /**
+   * Retrieves the current user's ID from localStorage.
+   * 
+   * @function getCurrentUserId
+   * @returns {string | null} User ID or null if not logged in.
+   */
   const getCurrentUserId = (): string | null => {
     const userString = localStorage.getItem('user');
     return userString ? JSON.parse(userString).id : null;
   };
 
+  /**
+   * Extracts the user ID from a review object.
+   * Handles both string userId and populated UserData object.
+   * 
+   * @function getReviewUserId
+   * @param {Review} review - The review object.
+   * @returns {string} The user ID.
+   */
   const getReviewUserId = (review: Review): string => {
     return typeof review.userId === 'string' 
       ? review.userId 
       : review.userId._id;
   };
 
+  /**
+   * Checks if a review belongs to the current user.
+   * 
+   * @function isUserReview
+   * @param {Review} review - The review to check.
+   * @returns {boolean} True if the review belongs to current user.
+   */
   const isUserReview = (review: Review): boolean => {
     const currentUserId = getCurrentUserId();
     if (!currentUserId) return false;
     return getReviewUserId(review) === currentUserId;
   };
 
+  /**
+   * Retrieves the current user's review if it exists.
+   * 
+   * @function getUserReview
+   * @returns {Review | undefined} The user's review or undefined.
+   */
   const getUserReview = (): Review | undefined => {
     return reviews.find((r) => isUserReview(r));
   };
 
+  /**
+   * Calculates the average rating from all reviews.
+   * @type {number | null}
+   */
   const avgRating = reviews.length > 0 
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
     : null;
 
+  /**
+   * Effect hook to fetch movie data and reviews on component mount.
+   * Runs when the movie ID changes.
+   */
   useEffect(() => {
     if (!id) return;
     let mounted = true;
     setLoading(true);
     setError(null);
 
+    /**
+     * Fetches movie details from the API.
+     * @async
+     * @function fetchMovie
+     */
     const fetchMovie = async () => {
       try {
         const res = await apiClient.get<Movie>(`/api/v1/movies/${id}`);
@@ -114,6 +304,12 @@ const MoviePage: React.FC = () => {
       }
     };
 
+    /**
+     * Fetches all reviews for the current movie.
+     * Also checks if current user has already reviewed.
+     * @async
+     * @function fetchReviews
+     */
     const fetchReviews = async () => {
       try {
         const res = await apiClient.get<Review[]>(`/api/v1/reviews/movie/${id}/`);
@@ -138,6 +334,15 @@ const MoviePage: React.FC = () => {
     };
   }, [id]);
 
+  /**
+   * Handles the submission of a new review.
+   * Validates user authentication, rating selection, and comment content.
+   * 
+   * @async
+   * @function handleAddReview
+   * @param {React.FormEvent} e - Form submission event.
+   * @returns {Promise<void>}
+   */
   const handleAddReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !id) return;
@@ -186,6 +391,10 @@ const MoviePage: React.FC = () => {
     }
   };
 
+  /**
+   * Opens the edit modal and populates it with current review data.
+   * @function openEditModal
+   */
   const openEditModal = () => {
     const userReview = getUserReview();
     if (userReview) {
@@ -195,6 +404,10 @@ const MoviePage: React.FC = () => {
     }
   };
 
+  /**
+   * Closes the edit modal and resets form fields.
+   * @function closeEditModal
+   */
   const closeEditModal = () => {
     setIsModalOpen(false);
     setEditComment('');
@@ -202,14 +415,30 @@ const MoviePage: React.FC = () => {
     setEditHoverRating(null);
   };
 
+  /**
+   * Opens the delete confirmation modal.
+   * @function openDeleteModal
+   */
   const openDeleteModal = () => {
     setIsDeleteModalOpen(true);
   };
 
+  /**
+   * Closes the delete confirmation modal.
+   * @function closeDeleteModal
+   */
   const closeDeleteModal = () => {
     setIsDeleteModalOpen(false);
   };
 
+  /**
+   * Handles the deletion of the user's review.
+   * Validates user authentication and sends delete request to API.
+   * 
+   * @async
+   * @function handleDeleteReview
+   * @returns {Promise<void>}
+   */
   const handleDeleteReview = async () => {
     const userReview = getUserReview();
     if (!userReview) return;
@@ -243,6 +472,15 @@ const MoviePage: React.FC = () => {
     }
   };
 
+  /**
+   * Handles the update of an existing review.
+   * Validates user authentication, rating, and comment content.
+   * 
+   * @async
+   * @function updateReview
+   * @param {React.FormEvent} e - Form submission event.
+   * @returns {Promise<void>}
+   */
   const updateReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editComment.trim() || !id) return;
@@ -273,7 +511,6 @@ const MoviePage: React.FC = () => {
 
       notify('Comentario actualizado exitosamente.');
 
-      
       setReviews((prev) => 
         prev.map((r) => 
           isUserReview(r) ? updated : r
@@ -281,7 +518,6 @@ const MoviePage: React.FC = () => {
       );
       
       closeEditModal();
-      
       
     } catch (err: any) {
       console.error('update review error', err);
@@ -520,7 +756,7 @@ const MoviePage: React.FC = () => {
         </ul>
       </section>
 
-      {/* Modal de edición */}
+      {/* Edit modal */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={closeEditModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -589,9 +825,7 @@ const MoviePage: React.FC = () => {
         </div>
       )}
 
-      
-
-      {/* modal de confirmacion de eliminacion */}
+      {/* Delete confirmation modal */}
       {isDeleteModalOpen && (
         <div className="modal-overlay" onClick={closeDeleteModal}>
           <div className="modal-content modal-delete" onClick={(e) => e.stopPropagation()}>
