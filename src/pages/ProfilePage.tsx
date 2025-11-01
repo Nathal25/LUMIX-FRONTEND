@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import "../styles/ProfilePage.scss";
 import authService from "../services/authService";
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+
 
 /**
  * Representa los datos de un usuario en el sistema.
@@ -35,6 +37,8 @@ type User = {
  */
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
+  const notify = (m:string) => toast(m);
+  
   
   /** State that maintains the original user data for restoration */
   const [original, setOriginal] = useState<User | null>(null);
@@ -136,6 +140,7 @@ export const ProfilePage: React.FC = () => {
         console.log(res.message);
         
         const userString = localStorage.getItem("user");
+        notify('Perfil actualizado exitosamente.');
         if (userString) {
           const userData = JSON.parse(userString);
           const updatedUser = {
@@ -196,6 +201,19 @@ export const ProfilePage: React.FC = () => {
 
   return (
     <div className="profile-page">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        transition={Bounce}
+      />
       <div className="profile-card" role="region" aria-label="Perfil de usuario">
         <h2 className="profile-title">Mi perfil</h2>
 
