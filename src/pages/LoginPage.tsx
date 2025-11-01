@@ -2,6 +2,7 @@ import React, { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 import "../styles/LoginPage.scss";
+import { useSpeech } from "../contexts/SpeechContext";
 
 /**
  * Página de inicio de sesión de usuarios.
@@ -39,6 +40,9 @@ export const LoginPage: React.FC = () => {
 
   /** Navigation hook to redirect to dashboard after login */
   const navigate = useNavigate();
+
+  /** Speech synthesis context for accessibility */
+  const { handleSpeak } = useSpeech();
 
   /**
    * Manager for form submission.
@@ -100,7 +104,11 @@ export const LoginPage: React.FC = () => {
           )}
 
           <form className="login-form" onSubmit={handleSubmit}>
-            <label className="form-label">
+            <label 
+              className="form-label"
+              onMouseEnter={() => handleSpeak('Campo de correo electrónico')}
+              onFocus={() => handleSpeak('Campo de correo electrónico')}
+            >
               Email:
               <input
                 className="form-input"
@@ -108,12 +116,18 @@ export const LoginPage: React.FC = () => {
                 placeholder="Ingresa tu correo"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onFocus={() => handleSpeak('Ingresa tu correo electrónico')}
                 required
                 disabled={loading}
+                aria-label="Campo de correo electrónico"
               />
             </label>
 
-            <label className="form-label">
+            <label 
+              className="form-label"
+              onMouseEnter={() => handleSpeak('Campo de contraseña')}
+              onFocus={() => handleSpeak('Campo de contraseña')}
+            >
               Contraseña:
               <input
                 className="form-input"
@@ -121,12 +135,20 @@ export const LoginPage: React.FC = () => {
                 placeholder="Ingresa tu contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => handleSpeak('Ingresa tu contraseña')}
                 required
                 disabled={loading}
+                aria-label="Campo de contraseña"
               />
             </label>
 
-            <button className="btn-login" type="submit" disabled={loading}>
+            <button 
+              className="btn-login" 
+              type="submit" 
+              disabled={loading}
+              onMouseEnter={() => handleSpeak(loading ? 'Ingresando, por favor espera' : 'Botón ingresar')}
+              onFocus={() => handleSpeak(loading ? 'Ingresando, por favor espera' : 'Botón ingresar')}
+            >
               {loading ? "Ingresando..." : "Ingresar"}
             </button>
           </form>
@@ -134,12 +156,25 @@ export const LoginPage: React.FC = () => {
           <div className="login-links">
             <p>
               ¿No tienes una cuenta?{" "}
-              <a href="/register" className="link-register">
+              <a 
+                href="/register" 
+                className="link-register"
+                onMouseEnter={() => handleSpeak('Crear una cuenta nueva')}
+                onFocus={() => handleSpeak('Crear una cuenta nueva')}
+              >
                 Regístrate aquí
               </a>
             </p>
-            <a className="link-forgot" onClick={() => navigate('/reset-password')}>
-              ¿Olvidaste tu constraseña? Haz click aquí
+            <a 
+              className="link-forgot" 
+              onClick={() => navigate('/reset-password')}
+              onMouseEnter={() => handleSpeak('Recuperar contraseña olvidada')}
+              onFocus={() => handleSpeak('Recuperar contraseña olvidada')}
+              tabIndex={0}
+              role="button"
+              onKeyPress={(e) => e.key === 'Enter' && navigate('/reset-password')}
+            >
+              ¿Olvidaste tu contraseña? Haz click aquí
             </a>
           </div>
         </section>

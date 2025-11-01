@@ -2,6 +2,7 @@ import React, { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 import "../styles/RegisterPage.scss";
+import { useSpeech } from "../contexts/SpeechContext";
 
 /**
  * RegisterPage Component
@@ -32,6 +33,9 @@ export const RegisterPage: React.FC = () => {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  /** Speech synthesis context for accessibility */
+  const { handleSpeak } = useSpeech();
 
   /**
    * Validates all registration form inputs.
@@ -136,29 +140,45 @@ export const RegisterPage: React.FC = () => {
           <h2 className="card-title">Crear cuenta</h2>
 
           <form className="register-form" onSubmit={handleSubmit}>
-            <label className="form-label">
+            <label 
+              className="form-label"
+              onMouseEnter={() => handleSpeak('Campo de nombre')}
+              onFocus={() => handleSpeak('Campo de nombre')}
+            >
               Nombre:
               <input
                 className="form-input"
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                onFocus={() => handleSpeak('Ingresa tu nombre')}
                 disabled={loading}
+                aria-label="Campo de nombre"
               />
             </label>
 
-            <label className="form-label">
+            <label 
+              className="form-label"
+              onMouseEnter={() => handleSpeak('Campo de apellidos')}
+              onFocus={() => handleSpeak('Campo de apellidos')}
+            >
               Apellidos:
               <input
                 className="form-input"
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                onFocus={() => handleSpeak('Ingresa tus apellidos')}
                 disabled={loading}
+                aria-label="Campo de apellidos"
               />
             </label>
 
-            <label className="form-label">
+            <label 
+              className="form-label"
+              onMouseEnter={() => handleSpeak('Campo de edad, mínimo 13 años')}
+              onFocus={() => handleSpeak('Campo de edad, mínimo 13 años')}
+            >
               Edad:
               <input
                 className="form-input"
@@ -167,40 +187,60 @@ export const RegisterPage: React.FC = () => {
                 max={120}
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
+                onFocus={() => handleSpeak('Ingresa tu edad, debes tener al menos 13 años')}
                 disabled={loading}
+                aria-label="Campo de edad"
               />
             </label>
 
-            <label className="form-label">
+            <label 
+              className="form-label"
+              onMouseEnter={() => handleSpeak('Campo de correo electrónico')}
+              onFocus={() => handleSpeak('Campo de correo electrónico')}
+            >
               Correo:
               <input
                 className="form-input"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onFocus={() => handleSpeak('Ingresa tu correo electrónico')}
                 disabled={loading}
+                aria-label="Campo de correo electrónico"
               />
             </label>
 
-            <label className="form-label">
+            <label 
+              className="form-label"
+              onMouseEnter={() => handleSpeak('Campo de contraseña, mínimo 8 caracteres, debe incluir mayúscula, número y carácter especial')}
+              onFocus={() => handleSpeak('Campo de contraseña')}
+            >
               Contraseña:
               <input
                 className="form-input"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => handleSpeak('Ingresa tu contraseña, mínimo 8 caracteres con mayúscula, número y carácter especial')}
                 disabled={loading}
+                aria-label="Campo de contraseña"
               />
             </label>
 
-            <label className="form-label">
+            <label 
+              className="form-label"
+              onMouseEnter={() => handleSpeak('Campo de confirmación de contraseña')}
+              onFocus={() => handleSpeak('Campo de confirmación de contraseña')}
+            >
               Confirmar contraseña:
               <input
                 className="form-input"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                onFocus={() => handleSpeak('Confirma tu contraseña')}
                 disabled={loading}
+                aria-label="Campo de confirmación de contraseña"
               />
             </label>
 
@@ -212,7 +252,13 @@ export const RegisterPage: React.FC = () => {
               </ul>
             )}
 
-            <button className="cta" type="submit" disabled={loading}>
+            <button 
+              className="cta" 
+              type="submit" 
+              disabled={loading}
+              onMouseEnter={() => handleSpeak(loading ? 'Creando cuenta, por favor espera' : 'Botón crear cuenta')}
+              onFocus={() => handleSpeak(loading ? 'Creando cuenta, por favor espera' : 'Botón crear cuenta')}
+            >
               {loading ? "Creando cuenta..." : "Crear cuenta"}
             </button>
           </form>
@@ -220,7 +266,12 @@ export const RegisterPage: React.FC = () => {
           <div className="register-links" style={{ marginTop: '1rem', textAlign: 'center' }}>
             <p>
               ¿Ya tienes una cuenta?{" "}
-              <a href="/login" className="link-login">
+              <a 
+                href="/login" 
+                className="link-login"
+                onMouseEnter={() => handleSpeak('Ir a iniciar sesión')}
+                onFocus={() => handleSpeak('Ir a iniciar sesión')}
+              >
                 Inicia sesión aquí
               </a>
             </p>
