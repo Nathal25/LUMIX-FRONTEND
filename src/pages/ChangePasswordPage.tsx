@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import '../styles/ChangePasswordPage.scss';
 import authService from '../services/authService';
 import { useNavigate } from 'react-router';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+
+
 
 /**
  * ChangePasswordPage Component
@@ -19,6 +22,7 @@ export const ChangePasswordPage: React.FC = () => {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const notify = (m:string) => toast(m);
   const navigate = useNavigate();
 
   /**
@@ -69,11 +73,11 @@ export const ChangePasswordPage: React.FC = () => {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      
+      notify('Contraseña cambiada exitosamente.');
       // Redirect to profile page after 2 seconds
       setTimeout(() => {
         navigate('/profile');
-      }, 2000);
+      }, 3500);
     } catch (err: any) {
       setErrors([err.message || 'Error al cambiar la contraseña']);
       console.error('Error:', err);
@@ -84,6 +88,19 @@ export const ChangePasswordPage: React.FC = () => {
 
   return (
     <div className="change-password-page">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        transition={Bounce}
+      />
       <div className="change-password-card" role="region" aria-label="Cambiar contraseña">
         <h2 className="change-password-title">Cambiar contraseña</h2>
 

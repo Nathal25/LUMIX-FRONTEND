@@ -4,6 +4,8 @@ import apiClient from '../services/apiClient';
 import VideoModal from '../components/VideoModal';
 import '../styles/MoviePage.scss';
 import { useSpeech } from '../contexts/SpeechContext';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+
 
 
 type Movie = {
@@ -37,6 +39,8 @@ type Review = {
 const MoviePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const notify = (m:string) => toast(m);
+  
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
@@ -166,6 +170,7 @@ const MoviePage: React.FC = () => {
       setUserCommented(true);
       setNewComment('');
       setNewRating(0);
+      notify('Review creado exitosamente.');
     } catch (err: any) {
       console.error('review error', err);
       if (err?.response?.status === 409) {
@@ -225,7 +230,7 @@ const MoviePage: React.FC = () => {
       setUserCommented(false);
       closeDeleteModal();
       
-      window.alert('Reseña eliminada exitosamente.');
+      notify('Comentario eliminado exitosamente.');
     } catch (err: any) {
       console.error('delete review error', err);
       if (err?.response?.status === 404) {
@@ -265,6 +270,9 @@ const MoviePage: React.FC = () => {
       };
 
       const updated = await apiClient.put<Review>(`/api/v1/reviews`, payload);
+
+      notify('Comentario actualizado exitosamente.');
+
       
       setReviews((prev) => 
         prev.map((r) => 
@@ -313,6 +321,19 @@ const MoviePage: React.FC = () => {
 
   return (
     <main className="movie-page">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        transition={Bounce}
+      />
       <div className="movie-hero">
         <img className="movie-poster" src={movie.imageUrl} alt={movie.title} />
         <div className="movie-meta">
