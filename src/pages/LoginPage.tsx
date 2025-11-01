@@ -174,7 +174,7 @@ export const LoginPage: React.FC = () => {
               role="button"
               onKeyPress={(e) => e.key === 'Enter' && navigate('/reset-password')}
             >
-              ¿Olvidaste tu constraseña? Haz click aquí
+              ¿Olvidaste tu contraseña? Haz click aquí
             </a>
           </div>
         </section>
