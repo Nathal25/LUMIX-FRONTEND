@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../styles/Dashboard.scss';
 import apiClient from '../services/apiClient';
 import VideoModal from '../components/VideoModal';
+import { useSpeech } from '../contexts/SpeechContext';
 
 /**
  * Represents a movie/video object with metadata.
@@ -54,6 +55,9 @@ export const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Movie | null>(null);
   const [hasMore, setHasMore] = useState(true);
+
+  // Accessibility: Speech Synthesis (from global context)
+  const { handleSpeak } = useSpeech();
 
   /**
    * Fetches popular movies from the API when the limit changes.
@@ -141,6 +145,8 @@ export const Dashboard: React.FC = () => {
                   type="button"
                   className="video-item"
                   onClick={() => setSelectedVideo(video)}
+                  onMouseEnter={() => handleSpeak(`${video.title}. Por ${video.author}`)}
+                  onFocus={() => handleSpeak(`${video.title}. Por ${video.author}`)}
                   aria-label={`Abrir reproductor para ${video.title}`}
                   title={`Abrir: ${video.title}`}
                 >
@@ -164,6 +170,8 @@ export const Dashboard: React.FC = () => {
               <button
                 className="btn-load-more"
                 onClick={handleLoadMore}
+                onMouseEnter={() => handleSpeak('Cargar más películas')}
+                onFocus={() => handleSpeak('Cargar más películas')}
                 disabled={loadingMore}
                 title="Cargar más películas"
               >

@@ -655,10 +655,10 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
   const [duration, setDuration] = useState<number>(0);
   const [loadingPoster, setLoadingPoster] = useState(true);
 
-  // Estados para subtítulos
+  // States for subtitles
   const [captionsEnabled, setCaptionsEnabled] = useState(false);
   const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
-  const [selectedSubtitle, setSelectedSubtitle] = useState<string | null>(null); // "es", "en" o null
+  const [selectedSubtitle, setSelectedSubtitle] = useState<string | null>(null); // "es", "en" or null
   const [subtitleUrls, setSubtitleUrls] = useState<{ es?: string; en?: string }>({});
   const [loadingSubtitles, setLoadingSubtitles] = useState(false);
 
@@ -784,11 +784,26 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
           e.preventDefault();
           setShowSubtitleMenu(!showSubtitleMenu);
           break;
+        case 's':
+        case 'S':
+          e.preventDefault();
+          selectSubtitle(captionsEnabled ? null : 'es');
+          break;
+        case 'd':
+        case 'D':
+          e.preventDefault();
+          selectSubtitle(captionsEnabled ? null : 'en');
+          break;
         case 'l':
         case 'L':
           e.preventDefault();
           handleForward();
           break;
+        case 'n':
+        case 'N':
+          e.preventDefault();
+          selectSubtitle(null);
+          break;   
         case 'j':
         case 'J':
           e.preventDefault();
@@ -1067,7 +1082,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
                           onClick={() => selectSubtitle('es')}
                           disabled={loadingSubtitles}
                         >
-                          🇪🇸 Español {loadingSubtitles && '(cargando...)'}
+                          ESP Español {loadingSubtitles && '(cargando...)'}
                         </button>
                       )}
                       {subtitleUrls.en && (
@@ -1076,7 +1091,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
                           onClick={() => selectSubtitle('en')}
                           disabled={loadingSubtitles}
                         >
-                          🇬🇧 English {loadingSubtitles && '(cargando...)'}
+                          ENG English {loadingSubtitles && '(cargando...)'}
                         </button>
                       )}
                     </div>
@@ -1099,7 +1114,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, title, movieId, onClo
             </button>
           </div>
           <p className="video-actions-hint">
-            <strong>Atajos de teclado:</strong> Espacio/K: Reproducir/Pausar · F: Favorito · ←/→: Retroceder/Adelantar · I: Ver ficha · C: Menú subtítulos · Esc: Cerrar
+            <strong>Atajos de teclado:</strong> Espacio/K: Reproducir/Pausar · F: Favorito · ←/→: Retroceder/Adelantar · I: Ver ficha · C: Abrir subtítulos · Esc: Cerrar · S: Subtítulos en Español · D: Subtítulos en Inglés · N: Desactivar subtítulos
           </p>
         </div>
       </div>

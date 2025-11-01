@@ -335,3 +335,83 @@
     }
   }
 }
+
+// -----------------------------------
+/* ======== ASISTENCIA DE VOZ (ACCESIBILIDAD) ======== */
+.voice-button {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+  position: relative;
+
+  img {
+    width: 20px;
+    height: 20px;
+    filter: invert(1) brightness(0.8);
+    transition: filter 0.3s ease, transform 0.3s ease;
+  }
+
+  &:hover {
+    background: rgba(125, 43, 192, 0.1);
+    border-color: rgba(125, 43, 192, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(125, 43, 192, 0.2);
+
+    img {
+      filter: invert(1) brightness(1.2);
+      transform: scale(1.1);
+    }
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.95);
+  }
+
+  &.active {
+    background: vars.$lumixPurple;
+    border-color: vars.$lumixPurple;
+    box-shadow: 0 0 20px rgba(125, 43, 192, 0.4);
+    animation: pulse 2s infinite;
+
+    img {
+      filter: invert(1) brightness(1.5);
+    }
+
+    &:hover {
+      background: color.scale(vars.$lumixPurple, $lightness: 10%);
+      border-color: color.scale(vars.$lumixPurple, $lightness: 10%);
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(125, 43, 192, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(125, 43, 192, 0.6);
+  }
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 768px) {
+  .voice-button {
+    width: 100%;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 0.5rem;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
